@@ -33,7 +33,7 @@ def create_app():
             {"Name": "Rice",   "Price": 8.50, "Barcode": "RICE001",  "Quantity": 100, "Image": "rice.jpg"},
             {"Name": "Salt",   "Price": 2.00, "Barcode": "SALT001",  "Quantity": 200, "Image": "salt.jpg"},
             {"Name": "Sugar",  "Price": 4.50, "Barcode": "SUGR001",  "Quantity": 150, "Image": "sugar.jpg"},
-            {"Name": "Candy",  "Price": 1.25, "Barcode": "CAND001",  "Quantity": 300, "Image": "candy.jpg"},
+            {"Name": "Candy",  "Price": 1.25, "Barcode": "CAND001",  "Quantity": 300, "Image": "placeholder.jpg"},
             {"Name": "Water",  "Price": 1.00, "Barcode": "WATR001",  "Quantity": 500, "Image": "water.jpg"},
             {"Name": "Tea",    "Price": 6.00, "Barcode": "TEA0001",  "Quantity": 80,  "Image": "tea.jpg"},
         ]
@@ -68,9 +68,9 @@ def create_app():
     def product_details(pid):
         p = Product.query.get_or_404(pid)
 
+        # Correct path to static/products
         image_path = os.path.join(
-            current_app.root_path,
-            "static",
+            current_app.static_folder,
             "products",
             p.Image if p.Image else ""
         )
