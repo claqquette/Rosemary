@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ p.Name }}{% endblock %}
+
+{% block content %}
+<h2>{{ p.Name }}</h2>
+
+<img src="{{ url_for('static', filename='products/' ~ (p.Image if p.Image else 'placeholder.jpg')) }}"
+     style="width:300px; height:200px; object-fit:cover; border-radius:10px;">
+
+<p>Price: {{ p.Price }} ₪</p>
+<p>Available: {{ p.Quantity }}</p>
+
+<form method="post" action="/cart/add/{{ p.Product_ID }}">
+    <input type="number" name="quantity" min="1" max="{{ p.Quantity }}" value="1" required>
+    <button type="submit">Add to Cart</button>
+</form>
+
+<a href="/">Back to Shop</a>
+{% endblock %}

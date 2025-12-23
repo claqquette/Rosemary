@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+
+<h2>Your Cart</h2>
+
+{% if items %}
+
+<table style="width:100%; border-collapse:collapse;">
+    <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+        <th>Action</th>
+    </tr>
+
+    {% for p, qty in items %}
+    <tr>
+        <td>{{ p.Name }}</td>
+        <td>{{ p.Price }}</td>
+        <td>{{ qty }}</td>
+        <td>{{ p.Price * qty }}</td>
+        <td>
+            <a href="/cart/remove/{{ p.Product_ID }}">Remove</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Total: {{ total }}</h3>
+
+<div style="margin-top:20px;">
+    <form action="/checkout" method="post" style="display:inline;">
+        <button type="submit">Checkout</button>
+    </form>
+
+    <a href="/" style="margin-left:15px;">Continue Shopping</a>
+</div>
+
+{% else %}
+
+<p>Your cart is empty.</p>
+
+<a href="/">⬅ Back to Products</a>
+
+{% endif %}
+
+{% endblock %}

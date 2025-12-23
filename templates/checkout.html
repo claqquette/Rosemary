@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<h2>Checkout</h2>
+
+<form method="post">
+    <label>Name:</label>
+    <input type="text" name="customer_name"><br><br>
+
+    <label>Phone:</label>
+    <input type="text" name="customer_phone"><br><br>
+
+    <label>Discount:</label>
+    <input type="number" name="discount" value="0"><br><br>
+
+    <button type="submit">Place Order</button>
+</form>
+
+<p>Total: {{ total }} ₪</p>
+
+{% endblock %}
