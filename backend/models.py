@@ -39,19 +39,21 @@ class Product(db.Model):
     Barcode = db.Column(db.String(120))
     Quantity = db.Column(db.Integer)
 
-    # One-to-one with WarehouseItem
+    # ✅ NEW: image filename stored in DB (ex: "rice.jpg")
+    Image = db.Column(db.String(255), nullable=True)
+
     warehouse_item = db.relationship(
         'WarehouseItem',
         backref=db.backref('product', uselist=False),
         uselist=False
     )
 
-    # One product → many order items
     order_items = db.relationship(
         'OrderItem',
         backref=db.backref('product'),
         lazy=True
     )
+
 
 
 # ===========================
