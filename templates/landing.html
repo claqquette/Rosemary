@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rosemary Supermarket</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: url("{{ url_for('static', filename='wallpaper.jpg') }}") no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+        .box {
+            background: rgba(0, 0, 0, 0.65);
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 30px;
+        }
+        a {
+            display: inline-block;
+            padding: 15px 35px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            margin: 10px;
+            border-radius: 10px;
+            font-size: 18px;
+        }
+        a:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>Rosemary Supermarket</h1>
+        <a href="{{ url_for('auth.login') }}">Login</a>
+        <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+    </div>
+</body>
+</html>

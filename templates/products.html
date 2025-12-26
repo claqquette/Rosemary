@@ -1,10 +1,117 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Products Management</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #f2f2f2;
+        }
+        input[type="text"], input[type="number"] {
+            width: 90%;
+            padding: 5px;
+        }
+        button, .btn {
+            padding: 8px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        button:hover, .btn:hover {
+            background: #45a049;
+        }
+        .delete-btn {
+            background: #f44336;
+        }
+        .delete-btn:hover {
+            background: #da190b;
+        }
+        .add-form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .add-form input {
+            margin: 5px;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Employee Product Management</h2>
+    <p>Logged in as: {{ current_user.Name }} ({{ current_user.Email }})</p>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
 
-{% block title %}Products{% endblock %}
+    <!-- Add Product Form -->
+    <div class="add-form">
+        <h3>Add New Product</h3>
+        <form action="{{ url_for('product.add_product') }}" method="post">
+            <input type="text" name="name" placeholder="Product Name" required>
+            <input type="number" step="0.01" name="price" placeholder="Price" required>
+            <input type="text" name="barcode" placeholder="Barcode">
+            <input type="number" name="quantity" placeholder="Quantity" required>
+            <button type="submit">Add Product</button>
+        </form>
+    </div>
 
-{% block content %}
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p style="color: {% if category == 'error' %}red{% else %}green{% endif %};">
+                    {{ message }}
+                </p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-    {% include "add_product.html" %}
-    {% include "product_table.html" %}
+    <!-- Products Table -->
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Barcode</th>
+            <th>Quantity</th>
+            <th>Actions</th>
+        </tr>
 
-{% endblock %}
+        {% for p in products %}
+        <tr>
+            <form action="{{ url_for('product.update_product', product_id=p.Product_ID) }}" method="post">
+                <td>{{ p.Product_ID }}</td>
+                <td><input type="text" name="name" value="{{ p.Name }}" required></td>
+                <td><input type="number" step="0.01" name="price" value="{{ p.Price }}" required></td>
+                <td><input type="text" name="barcode" value="{{ p.Barcode }}"></td>
+                <td><input type="number" name="quantity" value="{{ p.Quantity }}" required></td>
+                <td>
+                    <button type="submit">Update</button>
+                    <a href="{{ url_for('product.delete_product', product_id=p.Product_ID) }}"
+                       class="btn delete-btn"
+                       onclick="return confirm('Delete {{ p.Name }}?')">
+                        Delete
+                    </a>
+                </td>
+            </form>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

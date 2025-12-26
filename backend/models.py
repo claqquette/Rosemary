@@ -2,9 +2,7 @@ from . import db
 from flask_login import UserMixin
 
 
-# ===========================
-# Manufacturer Table
-# ===========================
+# MANIFACTURER Table
 class Manufacturer(db.Model):
     __tablename__ = 'Manufacturer'
 
@@ -21,13 +19,12 @@ class Manufacturer(db.Model):
     )
 
 
-# ===========================
 # Product Table
-# ===========================
 class Product(db.Model):
     __tablename__ = 'Product'
 
     Product_ID = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
+
     Man_ID = db.Column(
         db.Integer,
         db.ForeignKey('Manufacturer.Man_ID', onupdate='CASCADE'),
@@ -39,7 +36,6 @@ class Product(db.Model):
     Barcode = db.Column(db.String(120))
     Quantity = db.Column(db.Integer)
 
-    # ✅ NEW: image filename stored in DB (ex: "rice.jpg")
     Image = db.Column(db.String(255), nullable=True)
 
     warehouse_item = db.relationship(
@@ -56,9 +52,7 @@ class Product(db.Model):
 
 
 
-# ===========================
 # WarehouseItem Table (1–1 with Product)
-# ===========================
 class WarehouseItem(db.Model):
     __tablename__ = 'WarehouseItem'
 
@@ -72,15 +66,16 @@ class WarehouseItem(db.Model):
     Quantity = db.Column(db.Integer)
 
 
-# ===========================
 # Customer Table
-# ===========================
-class Customer(db.Model):
+# Customer Table
+class Customer(db.Model, UserMixin):  # Add UserMixin here
     __tablename__ = 'Customer'
 
     Cust_ID = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     Phone_Num = db.Column(db.String(50))
     Name = db.Column(db.String(120))
+    Email = db.Column(db.String(50), unique=True)
+    Password = db.Column(db.String(50))
 
     # One customer → many orders
     orders = db.relationship(
@@ -89,10 +84,13 @@ class Customer(db.Model):
         lazy=True
     )
 
+    def get_id(self):
+        # For Flask-Login
+        return str(self.Cust_ID)
 
-# ===========================
+
 # Employee Table (Login User)
-# ===========================
+
 class Employee(db.Model, UserMixin):
     __tablename__ = 'Employee'
 
@@ -101,9 +99,8 @@ class Employee(db.Model, UserMixin):
     Name = db.Column(db.String(120))
     Address = db.Column(db.String(200))
 
-    # OPTIONAL login fields (add if you want login system)
-    Email = db.Column(db.String(100), unique=True, nullable=True)
-    Password = db.Column(db.String(255), nullable=True)
+    Email = db.Column(db.String(50), unique=True)
+    Password = db.Column(db.String(50))
 
     # One employee → many orders
     orders = db.relationship(
@@ -117,9 +114,9 @@ class Employee(db.Model, UserMixin):
         return str(self.Emp_ID)
 
 
-# ===========================
+
 # Orders Table
-# ===========================
+
 class Orders(db.Model):
     __tablename__ = 'Orders'
 
@@ -137,7 +134,7 @@ class Orders(db.Model):
     )
 
     Quantity = db.Column(db.Integer)
-    Date = db.Column(db.String(50))      # you can change to db.Date or db.DateTime later
+    Date = db.Column(db.String(50))
     Price = db.Column(db.Float)
     Discount = db.Column(db.Float)
 
@@ -149,9 +146,9 @@ class Orders(db.Model):
     )
 
 
-# ===========================
+
 # OrderItem Table (M–N link: Orders ↔ Product)
-# ===========================
+
 class OrderItem(db.Model):
     __tablename__ = 'Order_Item'
 
