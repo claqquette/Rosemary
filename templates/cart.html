@@ -1,50 +1,185 @@
-{% extends "base.html" %}
-{% block title %}Cart{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cart</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <style>
+        body {
+            font-family: Arial;
+            background: #1a1a1a;
+            margin: 0;
+            padding: 20px;
+        }
 
-{% block content %}
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #2d2d2d;
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid #3d3d3d;
+        }
 
-<h2>Your Cart</h2>
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
 
-{% if items %}
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
 
-<table style="width:100%; border-collapse:collapse;">
-    <tr>
-        <th>Product</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Subtotal</th>
-        <th>Action</th>
-    </tr>
+        th {
+            background: #1a1a1a;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #3d3d3d;
+        }
 
-    {% for p, qty in items %}
-    <tr>
-        <td>{{ p.Name }}</td>
-        <td>{{ p.Price }} ₪</td>
-        <td>{{ qty }}</td>
-        <td>{{ p.Price * qty }} ₪</td>
-        <td>
-            <a href="{{ url_for('cart.remove_from_cart', product_id=p.Product_ID) }}">Remove</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+        td {
+            padding: 15px;
+            border: 1px solid #3d3d3d;
+            color: #aaa;
+        }
 
-<h3>Total: {{ total }} ₪</h3>
+        tr:hover {
+            background: #333;
+        }
 
-<div style="margin-top:20px;">
-    <form action="{{ url_for('cart.checkout') }}" method="get" style="display:inline;">
-        <button type="submit">Checkout</button>
-    </form>
+        /* Total */
+        .total {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            border-radius: 0;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid #3d3d3d;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+        }
 
-    <a href="{{ url_for('shop') }}" style="margin-left:15px;">Continue Shopping</a>
-</div>
+        /* Buttons */
+        button, .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 0;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            font-weight: bold;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+        }
 
-{% else %}
+        .checkout-btn {
+            background: white;
+            color: black;
+        }
 
-<p>Your cart is empty.</p>
+        .checkout-btn:hover {
+            background: #ddd;
+        }
 
-<a href="{{ url_for('shop') }}">⬅ Back to Products</a>
+        .continue-btn {
+            background: #555;
+            color: white;
+        }
 
-{% endif %}
+        .continue-btn:hover {
+            background: #666;
+        }
 
-{% endblock %}
+        .remove-btn {
+            background: #444;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+        .remove-btn:hover {
+            background: #555;
+        }
+
+        /* Empty Cart */
+        .empty-cart {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-cart h2 {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .empty-cart p {
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <img src="{{ url_for('static', filename='logo.png') }}" style="height:45px; vertical-align:middle; margin-right:15px;">
+            Your Shopping Cart
+        </h1>
+
+        {% if items %}
+            <!-- Cart Table -->
+            <table>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Action</th>
+                </tr>
+
+                {% for p, qty in items %}
+                <tr>
+                    <td>{{ p.Name }}</td>
+                    <td>{{ "%.2f"|format(p.Price) }} ₪</td>
+                    <td>{{ qty }}</td>
+                    <td>{{ "%.2f"|format(p.Price * qty) }} ₪</td>
+                    <td>
+                        <a href="{{ url_for('cart.remove_from_cart', product_id=p.Product_ID) }}"
+                           class="btn remove-btn">
+                            Remove
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <!-- Total -->
+            <div class="total">
+                Total: {{ "%.2f"|format(total) }} ₪
+            </div>
+
+            <!-- Buttons -->
+            <div style="text-align: center;">
+                <form action="{{ url_for('cart.checkout') }}" method="get" style="display:inline;">
+                    <button type="submit" class="checkout-btn">Checkout</button>
+                </form>
+                <a href="{{ url_for('shop') }}" class="btn continue-btn">Continue Shopping</a>
+            </div>
+
+        {% else %}
+            <!-- Empty Cart -->
+            <div class="empty-cart">
+                <h2>Your Cart is Empty</h2>
+                <p>You haven't added any products yet.</p>
+                <a href="{{ url_for('shop') }}" class="btn continue-btn">Go to Shop</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

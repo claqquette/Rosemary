@@ -2,44 +2,87 @@
 <html>
 <head>
     <title>Sign Up</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
     <style>
         body {
             font-family: Arial;
-            background: #f2f2f2;
+            background: #1a1a1a;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            padding: 20px;
         }
         .box {
-            background: white;
+            background: #2d2d2d;
             padding: 30px;
             border-radius: 10px;
             width: 320px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            border: 1px solid #3d3d3d;
+        }
+        .logo {
+            width: 140px;
+            display: block;
+            margin: 0 auto 25px;
+        }
+        h2 {
+            color: white;
+            text-align: center;
+            margin-top: 0;
         }
         input, button {
             width: 100%;
             padding: 10px;
             margin: 8px 0;
+            border-radius: 0;
+        }
+        input {
+            background: #1a1a1a;
+            border: 2px solid #444;
+            color: white;
         }
         button {
-            background: #4CAF50;
-            color: white;
+            background: white;
+            color: black;
             border: none;
+            cursor: pointer;
+            font-weight: bold;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
         }
         button:hover {
-            background: #45a049;
+            background: #ddd;
+        }
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            color: #aaa;
+            text-decoration: none;
+        }
+        a:hover {
+            color: white;
+        }
+        .error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ff6b6b;
         }
     </style>
 </head>
 <body>
     <div class="box">
+        <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
         <h2>Customer Sign Up</h2>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, message in messages %}
-                <p style="color:red;">{{ message }}</p>
+                {% if category == 'error' %}
+                    <p class="error">{{ message }}</p>
+                {% endif %}
             {% endfor %}
         {% endwith %}
 

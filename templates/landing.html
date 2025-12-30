@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Rosemary Supermarket</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
     <style>
         body {
             margin: 0;
@@ -13,33 +14,42 @@
             font-family: Arial, sans-serif;
         }
         .box {
-            background: rgba(0, 0, 0, 0.65);
+            background: rgba(26, 26, 26, 0.9);
             padding: 50px;
-            border-radius: 20px;
+            border-radius: 10px;
             text-align: center;
             color: white;
+            border: 1px solid rgba(61, 61, 61, 0.5);
+        }
+        .logo {
+            width: 250px;
+            margin-bottom: 30px;
         }
         h1 {
             font-size: 48px;
             margin-bottom: 30px;
+            color: white;
         }
         a {
             display: inline-block;
             padding: 15px 35px;
-            background: #4CAF50;
-            color: white;
+            background: white;
+            color: black;
             text-decoration: none;
             margin: 10px;
-            border-radius: 10px;
+            border-radius: 0;
             font-size: 18px;
+            font-weight: bold;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
         a:hover {
-            background: #45a049;
+            background: #ddd;
         }
     </style>
 </head>
 <body>
     <div class="box">
+        <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
         <h1>Rosemary Supermarket</h1>
         <a href="{{ url_for('auth.login') }}">Login</a>
         <a href="{{ url_for('auth.signup') }}">Sign Up</a>

@@ -15,11 +15,11 @@ def get_cart():
 
 
 @cart_bp.route('/cart/add/<int:product_id>', methods=['POST'])
-@login_required
 def add_to_cart(product_id):
-    if session.get("user_type") != "customer":
-        flash('Only customers can add to cart.', 'error')
-        return redirect(url_for('products'))
+    # Check if user is logged in as customer BEFORE doing anything
+    if not current_user.is_authenticated or session.get("user_type") != "customer":
+        # Don't flash message, just redirect silently
+        return redirect(url_for('auth.login'))
 
     product = Product.query.get_or_404(product_id)
     quantity = int(request.form.get('quantity', 1))
@@ -55,8 +55,7 @@ def add_to_cart(product_id):
 @login_required
 def view_cart():
     if session.get("user_type") != "customer":
-        flash('Only customers can view cart.', 'error')
-        return redirect(url_for('products'))
+        return redirect(url_for('auth.login'))
 
     cart = get_cart()
     items = []
@@ -75,8 +74,7 @@ def view_cart():
 @login_required
 def remove_from_cart(product_id):
     if session.get("user_type") != "customer":
-        flash('Access denied.', 'error')
-        return redirect(url_for('products'))
+        return redirect(url_for('auth.login'))
 
     cart = get_cart()
     product_id_str = str(product_id)
@@ -95,13 +93,11 @@ def remove_from_cart(product_id):
 def checkout():
     # Check if user is a customer FIRST
     if session.get("user_type") != "customer":
-        flash('Only customers can checkout. Please login as a customer.', 'error')
         return redirect(url_for('auth.login'))
 
     # Also double-check that current_user has Cust_ID attribute
     if not hasattr(current_user, 'Cust_ID'):
-        flash('Error: You must be logged in as a customer to checkout.', 'error')
-        logout_user()  # Force logout
+        logout_user()
         session.clear()
         return redirect(url_for('auth.login'))
 
