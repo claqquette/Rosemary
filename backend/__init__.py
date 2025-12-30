@@ -70,6 +70,9 @@ def create_app():
     from .product_routes import product_bp
     app.register_blueprint(product_bp)
 
+    from .cart_routes import cart_bp #new----------
+    app.register_blueprint(cart_bp) #new-----------
+
     # -------------------
     # DB INIT
     # -------------------

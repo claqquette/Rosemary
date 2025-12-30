@@ -9,7 +9,6 @@
 
 <table style="width:100%; border-collapse:collapse;">
     <tr>
-        <th>Image</th>
         <th>Product</th>
         <th>Price</th>
         <th>Quantity</th>
@@ -20,31 +19,31 @@
     {% for p, qty in items %}
     <tr>
         <td>{{ p.Name }}</td>
-        <td>{{ p.Price }}</td>
+        <td>{{ p.Price }} ₪</td>
         <td>{{ qty }}</td>
-        <td>{{ p.Price * qty }}</td>
+        <td>{{ p.Price * qty }} ₪</td>
         <td>
-            <a href="/cart/remove/{{ p.Product_ID }}">Remove</a>
+            <a href="{{ url_for('cart.remove_from_cart', product_id=p.Product_ID) }}">Remove</a>
         </td>
     </tr>
     {% endfor %}
 </table>
 
-<h3>Total: {{ total }}</h3>
+<h3>Total: {{ total }} ₪</h3>
 
 <div style="margin-top:20px;">
-    <form action="/checkout" method="post" style="display:inline;">
+    <form action="{{ url_for('cart.checkout') }}" method="get" style="display:inline;">
         <button type="submit">Checkout</button>
     </form>
 
-    <a href="/" style="margin-left:15px;">Continue Shopping</a>
+    <a href="{{ url_for('shop') }}" style="margin-left:15px;">Continue Shopping</a>
 </div>
 
 {% else %}
 
 <p>Your cart is empty.</p>
 
-<a href="/">⬅ Back to Products</a>
+<a href="{{ url_for('shop') }}">⬅ Back to Products</a>
 
 {% endif %}
 

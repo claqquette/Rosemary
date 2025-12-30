@@ -21,6 +21,7 @@
 </head>
 <body>
     <h2>Welcome to Rosemary Supermarket</h2>
+    <a href="/cart" style="margin-right:15px;">🛒 Cart</a> <!-- new updated lines -->
     <a href="{{ url_for('auth.logout') }}">Logout</a>
     <hr>
 
@@ -30,6 +31,15 @@
             <h4>{{ p.Name }}</h4>
             <p>Price: {{ p.Price }} ₪</p>
             <p>Stock: {{ p.Quantity }}</p>
+        <!-- new updated lines -->
+        {% if p.Quantity > 0 %}
+    <form method="post" action="{{ url_for('cart.add_to_cart', product_id=p.Product_ID) }}" style="margin-top:10px;">
+        <input type="number" name="quantity" min="1" max="{{ p.Quantity }}" value="1" style="width:50px; padding:5px;">
+        <button type="submit" style="background:#4CAF50; color:white; border:none; padding:8px 12px; cursor:pointer;">Add to Cart</button>
+    </form>
+{% else %}
+    <p style="color:red;">Out of Stock</p>
+{% endif %}
         </div>
     {% endfor %}
 </body>
