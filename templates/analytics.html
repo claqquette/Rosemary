@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics - Rosemary Supermarket</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <style>
+        body {
+            font-family: Arial;
+            background: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            color: white;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #2d2d2d;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid #3d3d3d;
+            padding: 20px 0;
+        }
+
+        .sidebar .logo {
+            width: 120px;
+            display: block;
+            margin: 0 auto 30px;
+        }
+
+        .sidebar h3 {
+            color: white;
+            text-align: center;
+            margin: 0 0 30px 0;
+            font-size: 18px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 15px 25px;
+            color: #aaa;
+            text-decoration: none;
+            margin: 5px 15px;
+            border-radius: 0;
+            transition: all 0.3s;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+        }
+
+        .sidebar a:hover {
+            background: #3d3d3d;
+            color: white;
+        }
+
+        .sidebar a.active {
+            background: white;
+            color: black;
+            font-weight: bold;
+        }
+
+        .sidebar .logout {
+            position: absolute;
+            bottom: 20px;
+            left: 15px;
+            right: 15px;
+            background: #444;
+            color: white;
+            text-align: center;
+        }
+
+        .sidebar .logout:hover {
+            background: #555;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .section {
+            background: #2d2d2d;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid #3d3d3d;
+        }
+
+        .section h2 {
+            color: white;
+            margin-top: 0;
+            border-bottom: 2px solid #3d3d3d;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background: #1a1a1a;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #3d3d3d;
+        }
+
+        td {
+            padding: 10px;
+            color: #aaa;
+            border: 1px solid #3d3d3d;
+        }
+
+        .stat-box {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #3d3d3d;
+        }
+
+        .stat-box strong {
+            color: white;
+            font-size: 18px;
+        }
+
+        .no-data {
+            color: #888;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+        <h3>Employee Panel</h3>
+
+        <a href="{{ url_for('products') }}">📦 Products</a>
+        <a href="{{ url_for('queries.analytics') }}" class="active">📊 Analytics</a>
+
+        <a href="{{ url_for('auth.logout') }}" class="logout">Logout</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 style="color: white; margin-bottom: 30px;">📊 Analytics Dashboard</h1>
+
+        <!-- Query 1: All Products -->
+        <div class="section">
+            <h2>1. All Products</h2>
+            {% if all_products %}
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Barcode</th>
+                    <th>Quantity</th>
+                </tr>
+                {% for p in all_products %}
+                <tr>
+                    <td>{{ p.Product_ID }}</td>
+                    <td>{{ p.Name }}</td>
+                    <td>{{ "%.2f"|format(p.Price) }} ₪</td>
+                    <td>{{ p.Barcode }}</td>
+                    <td>{{ p.Quantity }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No products found</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 2: All Customers -->
+        <div class="section">
+            <h2>2. All Customers</h2>
+            {% if all_customers %}
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+                {% for c in all_customers %}
+                <tr>
+                    <td>{{ c.Cust_ID }}</td>
+                    <td>{{ c.Name }}</td>
+                    <td>{{ c.Email }}</td>
+                    <td>{{ c.Phone_Num }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No customers found</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 3: All Employees -->
+        <div class="section">
+            <h2>3. All Employees</h2>
+            {% if all_employees %}
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                </tr>
+                {% for e in all_employees %}
+                <tr>
+                    <td>{{ e.Emp_ID }}</td>
+                    <td>{{ e.Name }}</td>
+                    <td>{{ e.Email }}</td>
+                    <td>{{ e.Phone_Num }}</td>
+                    <td>{{ e.Address }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No employees found</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 6: Orders Per Customer -->
+        <div class="section">
+            <h2>6. Total Orders Per Customer</h2>
+            {% if orders_per_customer %}
+            <table>
+                <tr>
+                    <th>Customer ID</th>
+                    <th>Name</th>
+                    <th>Total Orders</th>
+                </tr>
+                {% for o in orders_per_customer %}
+                <tr>
+                    <td>{{ o.Cust_ID }}</td>
+                    <td>{{ o.Name }}</td>
+                    <td>{{ o.total_orders }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No orders found</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 7: Total Warehouse Value -->
+        <div class="section">
+            <h2>7. Total Warehouse Value</h2>
+            <div class="stat-box">
+                <strong>{{ "%.2f"|format(total_warehouse_value or 0) }} ₪</strong>
+            </div>
+        </div>
+
+        <!-- Query 9: Average Product Price -->
+        <div class="section">
+            <h2>9. Average Product Price</h2>
+            <div class="stat-box">
+                <strong>{{ "%.2f"|format(average_price or 0) }} ₪</strong>
+            </div>
+        </div>
+
+        <!-- Query 10: Orders with Discount -->
+        <div class="section">
+            <h2>10. Orders with Discount</h2>
+            {% if orders_with_discount %}
+            <table>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                </tr>
+                {% for o in orders_with_discount %}
+                <tr>
+                    <td>{{ o.Order_ID }}</td>
+                    <td>{{ o.Date }}</td>
+                    <td>{{ o.Name }}</td>
+                    <td>{{ "%.2f"|format(o.Price) }} ₪</td>
+                    <td>{{ "%.2f"|format(o.Discount) }} ₪</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No orders with discount</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 11: Available Warehouse Products -->
+        <div class="section">
+            <h2>11. Available Products in Warehouse</h2>
+            {% if available_products %}
+            <table>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                </tr>
+                {% for p in available_products %}
+                <tr>
+                    <td>{{ p.Product_ID }}</td>
+                    <td>{{ p.Name }}</td>
+                    <td>{{ "%.2f"|format(p.Price) }} ₪</td>
+                    <td>{{ p.Quantity }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No products in warehouse</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 12: Low Stock Products -->
+        <div class="section">
+            <h2>12. Low Stock Products (Below 10)</h2>
+            {% if low_stock_products %}
+            <table>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                </tr>
+                {% for p in low_stock_products %}
+                <tr style="background: rgba(255, 107, 107, 0.1);">
+                    <td>{{ p.Product_ID }}</td>
+                    <td>{{ p.Name }}</td>
+                    <td>{{ "%.2f"|format(p.Price) }} ₪</td>
+                    <td style="color: #ff6b6b; font-weight: bold;">{{ p.Quantity }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No low stock products</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 14: Top Spending Customer -->
+        <div class="section">
+            <h2>14. Top Spending Customer</h2>
+            {% if top_spending_customer %}
+            <div class="stat-box">
+                <p><strong>Name:</strong> {{ top_spending_customer.Name }}</p>
+                <p><strong>Email:</strong> {{ top_spending_customer.Email }}</p>
+                <p><strong>Total Spent:</strong> {{ "%.2f"|format(top_spending_customer.total_spent) }} ₪</p>
+            </div>
+            {% else %}
+            <p class="no-data">No data available</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 15: Most Orders Customer -->
+        <div class="section">
+            <h2>15. Customer with Most Orders</h2>
+            {% if most_orders_customer %}
+            <div class="stat-box">
+                <p><strong>Name:</strong> {{ most_orders_customer.Name }}</p>
+                <p><strong>Email:</strong> {{ most_orders_customer.Email }}</p>
+                <p><strong>Total Orders:</strong> {{ most_orders_customer.order_count }}</p>
+            </div>
+            {% else %}
+            <p class="no-data">No data available</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 16: Most Recent Order -->
+        <div class="section">
+            <h2>16. Most Recent Order</h2>
+            {% if most_recent_order %}
+            <div class="stat-box">
+                <p><strong>Order ID:</strong> {{ most_recent_order.Order_ID }}</p>
+                <p><strong>Customer:</strong> {{ most_recent_order.Name }}</p>
+                <p><strong>Date:</strong> {{ most_recent_order.Date }}</p>
+                <p><strong>Price:</strong> {{ "%.2f"|format(most_recent_order.Price) }} ₪</p>
+            </div>
+            {% else %}
+            <p class="no-data">No orders found</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 18: Top Selling Employee -->
+        <div class="section">
+            <h2>18. Top Selling Employee</h2>
+            {% if top_selling_employee %}
+            <div class="stat-box">
+                <p><strong>Name:</strong> {{ top_selling_employee.Name }}</p>
+                <p><strong>Email:</strong> {{ top_selling_employee.Email }}</p>
+                <p><strong>Total Items Sold:</strong> {{ top_selling_employee.total_sold }}</p>
+            </div>
+            {% else %}
+            <p class="no-data">No data available</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 19: Products with Manufacturers -->
+        <div class="section">
+            <h2>19. Products with Manufacturers</h2>
+            {% if products_with_manufacturers %}
+            <table>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Manufacturer</th>
+                </tr>
+                {% for p in products_with_manufacturers %}
+                <tr>
+                    <td>{{ p.Product_ID }}</td>
+                    <td>{{ p.Name }}</td>
+                    <td>{{ "%.2f"|format(p.Price) }} ₪</td>
+                    <td>{{ p.manufacturer_name or 'N/A' }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No products found</p>
+            {% endif %}
+        </div>
+
+        <!-- Query 20: Monthly Sales -->
+        <div class="section">
+            <h2>20. Monthly Sales</h2>
+            {% if monthly_sales %}
+            <table>
+                <tr>
+                    <th>Month</th>
+                    <th>Total Sales</th>
+                    <th>Order Count</th>
+                </tr>
+                {% for m in monthly_sales %}
+                <tr>
+                    <td>{{ m.month }}</td>
+                    <td>{{ "%.2f"|format(m.total_sales) }} ₪</td>
+                    <td>{{ m.order_count }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No sales data</p>
+            {% endif %}
+        </div>
+
+    </div>
+</body>
+</html>

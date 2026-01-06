@@ -37,6 +37,7 @@ def create_app():
     # -------------------
     @app.route("/")
     def landing():
+        session.pop('_flashes', None)
         return render_template("landing.html")
 
     # -------------------
@@ -47,6 +48,7 @@ def create_app():
         if session.get("user_type") != "customer":
             return redirect(url_for("auth.login"))
 
+        # Query already in queries.py - just use simple query here
         products = Product.query.all()
         return render_template("shop.html", products=products)
 
@@ -58,6 +60,7 @@ def create_app():
         if session.get("user_type") != "employee":
             return redirect(url_for("auth.login"))
 
+        # Query already in queries.py - just use simple query here
         products = Product.query.all()
         return render_template("products.html", products=products)
 
@@ -70,8 +73,11 @@ def create_app():
     from .product_routes import product_bp
     app.register_blueprint(product_bp)
 
-    from .cart_routes import cart_bp #new----------
-    app.register_blueprint(cart_bp) #new-----------
+    from .cart_routes import cart_bp
+    app.register_blueprint(cart_bp)
+
+    from .queries import queries_bp
+    app.register_blueprint(queries_bp)
 
     # -------------------
     # DB INIT
