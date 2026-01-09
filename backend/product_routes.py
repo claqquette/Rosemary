@@ -18,10 +18,12 @@ def add_product():
         price = request.form.get('price')
         barcode = request.form.get('barcode')
         quantity = request.form.get('quantity')
+        discount = int(request.form.get("discount_percent", 0))  #NEWW
 
         new_product = Product(
             Name=name,
             Price=float(price),
+            Discount_Percent=discount,  # NEWW
             Barcode=barcode,
             Quantity=int(quantity)
         )
@@ -48,6 +50,7 @@ def update_product(product_id):
     product.Price = float(request.form.get('price'))
     product.Barcode = request.form.get('barcode')
     product.Quantity = int(request.form.get('quantity'))
+    product.Discount_Percent = int(request.form.get("discount_percent", 0)) #newww
 
     db.session.commit()
 
