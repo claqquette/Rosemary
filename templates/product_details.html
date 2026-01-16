@@ -8,10 +8,10 @@
      style="width:300px; height:200px; object-fit:cover; border-radius:10px;">
 
 <p>Price: {{ p.Price }} ₪</p>
-<p>Available: {{ p.Quantity }}</p>
+<p>Available: {{ p.stock_qty }}</p>
 
 <form method="post" action="/cart/add/{{ p.Product_ID }}">
-    <input type="number" name="quantity" min="1" max="{{ p.Quantity }}" value="1" required>
+    <input type="number" name="quantity" min="1" max="{{ p.stock_qty }}" value="1" required>
     <button type="submit">Add to Cart</button>
 </form>
 

@@ -1,13 +1,210 @@
-<form action="/product/add" method="post" style="text-align:center;">
-    <input type="text" name="name" placeholder="Product Name" required>
+<!-- ==================== ADD_PRODUCT.HTML ==================== -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Product</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: white;
+        }
+        .sidebar {
+            width: 260px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(20px);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 0;
+        }
+        .sidebar .logo {
+            width: 120px;
+            display: block;
+            margin: 0 auto 30px;
+        }
+        .sidebar h3 {
+            text-align: center;
+            margin: 0 0 30px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .sidebar a {
+            display: block;
+            padding: 14px 24px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            margin: 4px 16px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            transform: translateX(4px);
+        }
+        .sidebar a.active {
+            background: white;
+            color: black;
+            font-weight: 600;
+        }
+        .sidebar .logout {
+            position: absolute;
+            bottom: 20px;
+            left: 16px;
+            right: 16px;
+            background: rgba(255, 59, 48, 0.2);
+            text-align: center;
+        }
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .form-container {
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 40px 50px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 600px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            font-size: 28px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .form-full {
+            grid-column: 1 / -1;
+        }
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+        }
+        input:focus {
+            outline: none;
+            border-color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: white;
+            color: black;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: white;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .input-group {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+        <h3>Employee Panel</h3>
+        <a href="{{ url_for('products') }}" class="active">📦 Products</a>
+        <a href="{{ url_for('queries.analytics') }}">📊 Analytics</a>
+        <a href="{{ url_for('employee_orders.employee_orders') }}">🧾 Orders</a>
+        <a href="{{ url_for('auth.logout') }}" class="logout">Logout</a>
+    </div>
 
-    <input type="number" step="0.01" name="price" placeholder="Price" required>
+    <div class="main-content">
+        <div class="form-container">
+            <h2>Add New Product</h2>
 
-    <!--  NEW LINE -->
-    <input type="number" name="discount_percent" placeholder="Discount %" min="0" max="100" value="0">
+            <form action="/product/add" method="post">
+                <div class="form-grid">
+                    <div class="input-group form-full">
+                        <label>Product Name</label>
+                        <input type="text" name="name" placeholder="Enter product name" required>
+                    </div>
 
-    <input type="text" name="barcode" placeholder="Barcode">
-    <input type="number" name="quantity" placeholder="Quantity" required>
-    <br><br>
-    <button type="submit">Add Product</button>
-</form>
+                    <div class="input-group">
+                        <label>Price (₪)</label>
+                        <input type="number" step="0.01" name="price" placeholder="0.00" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Discount %</label>
+                        <input type="number" name="discount_percent" placeholder="0" min="0" max="100" value="0">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Barcode</label>
+                        <input type="text" name="barcode" placeholder="Enter barcode (optional)">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Quantity</label>
+                        <input type="number" name="quantity" placeholder="0" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Manufacturer ID</label>
+                        <input type="number" name="man_id" placeholder="Manufacturer ID (optional)">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Image Filename</label>
+                        <input type="text" name="image" placeholder="image.jpg (optional)">
+                    </div>
+                </div>
+
+                <button type="submit">✓ Add Product</button>
+            </form>
+
+            <a href="{{ url_for('products') }}" class="back-link">← Back to Products</a>
+        </div>
+    </div>
+</body>
+</html>

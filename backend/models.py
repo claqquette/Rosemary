@@ -23,8 +23,6 @@ class Manufacturer(db.Model):
 class Product(db.Model):
     __tablename__ = 'Product'
 
-    #--------------------------------------------------------------new updated
-
     def get_discount_percent(self) -> int:
         return int(self.Discount_Percent or 0)
 
@@ -38,6 +36,7 @@ class Product(db.Model):
     def discount_amount(self) -> float:
         return round(float(self.Price or 0) - self.discounted_price, 2)
 
+
     #-----------------------------------------------------------------------------------------------updated
     Product_ID = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
 
@@ -50,10 +49,14 @@ class Product(db.Model):
     Name = db.Column(db.String(120))
     Price = db.Column(db.Float)
     Barcode = db.Column(db.String(120))
-    Quantity = db.Column(db.Integer)
+#get quantity from warehouse item
+    @property
+    def stock_qty(self):
+        wi = WarehouseItem.query.filter_by(Product_ID=self.Product_ID).first()
+        return wi.Quantity if wi and wi.Quantity is not None else 0
 
     Image = db.Column(db.String(255), nullable=True)
-    Discount_Percent = db.Column(db.Integer, default=0)  #  NEW
+    Discount_Percent = db.Column(db.Integer, default=0)
     warehouse_item = db.relationship(
         'WarehouseItem',
         backref=db.backref('product', uselist=False),
@@ -82,7 +85,6 @@ class WarehouseItem(db.Model):
     Quantity = db.Column(db.Integer)
 
 
-# Customer Table
 # Customer Table
 class Customer(db.Model, UserMixin):  # Add UserMixin here
     __tablename__ = 'Customer'
@@ -153,6 +155,7 @@ class Orders(db.Model):
     Date = db.Column(db.String(50))
     Price = db.Column(db.Float)
     Discount = db.Column(db.Float)
+    Status = db.Column(db.String(20), default="pending")  # pending / accepted / rejected
 
     # One order → many order items
     order_items = db.relationship(

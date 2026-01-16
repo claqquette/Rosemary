@@ -1,48 +1,77 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flask_login import login_required, current_user, logout_user
-from .models import Product, Orders, OrderItem, Customer
+from .models import Product, Orders, OrderItem, Employee, WarehouseItem
 from . import db
 from datetime import datetime
 
 cart_bp = Blueprint('cart', __name__)
 
 
-# Helper function to get cart from session
+# ---------------------------
+# Helper: get cart from session
+# ---------------------------
 def get_cart():
-    if 'cart' not in session:
+    if 'cart' not in session or not isinstance(session['cart'], dict):
         session['cart'] = {}
     return session['cart']
 
 
+# ---------------------------
+# Helper: Get or create default employee for online orders
+# ---------------------------
+def get_default_employee():
+    """Get the default 'Online System' employee for customer self-checkout orders"""
+    default_emp = Employee.query.filter_by(Email='system@rosemary.emp').first()
+
+    if not default_emp:
+        # Create default system employee if it doesn't exist
+        default_emp = Employee(
+            Name='Online System',
+            Email='system@rosemary.emp',
+            Password='system_only_no_login',  # Should use hashing in production
+            Phone_Num='0000000000',
+            Address='System'
+        )
+        db.session.add(default_emp)
+        db.session.commit()
+
+    return default_emp.Emp_ID
+
+
+# ---------------------------
+# Add to cart
+# ---------------------------
 @cart_bp.route('/cart/add/<int:product_id>', methods=['POST'])
 def add_to_cart(product_id):
-    # Check if user is logged in as customer BEFORE doing anything
+    # Must be logged in as customer
     if not current_user.is_authenticated or session.get("user_type") != "customer":
-        # Don't flash message, just redirect silently
         return redirect(url_for('auth.login'))
 
     product = Product.query.get_or_404(product_id)
-    quantity = int(request.form.get('quantity', 1))
 
-    # Check if enough stock
-    if quantity > product.Quantity:
-        flash(f'Only {product.Quantity} items available in stock.', 'error')
+    try:
+        quantity = int(request.form.get('quantity', 1))
+    except ValueError:
+        quantity = 1
+
+    if quantity < 1:
+        quantity = 1
+
+    # Check stock
+    if quantity > product.stock_qty:
+        flash(f'Only {product.stock_qty} items available in stock.', 'error')
         return redirect(url_for('shop'))
 
-    # Get cart from session
     cart = get_cart()
+    pid = str(product_id)
 
-    # Add or update product in cart
-    product_id_str = str(product_id)
-    if product_id_str in cart:
-        cart[product_id_str] += quantity
-    else:
-        cart[product_id_str] = quantity
+    # Add/update
+    cart[pid] = cart.get(pid, 0) + quantity
 
-    # Make sure total quantity doesn't exceed stock
-    if cart[product_id_str] > product.Quantity:
-        cart[product_id_str] = product.Quantity
-        flash(f'Maximum quantity is {product.Quantity}', 'warning')
+    # Don't exceed stock
+    if cart[pid] > product.stock_qty:
+        cart[pid] = product.stock_qty
+        flash(f'Maximum quantity is {product.stock_qty}', 'warning')
 
     session['cart'] = cart
     session.modified = True
@@ -51,37 +80,49 @@ def add_to_cart(product_id):
     return redirect(url_for('shop'))
 
 
-@cart_bp.route('/cart')#-------updated
+# ---------------------------
+# View cart
+# ---------------------------
+@cart_bp.route('/cart')
 @login_required
 def view_cart():
     if session.get("user_type") != "customer":
         return redirect(url_for('auth.login'))
 
     cart = get_cart()
-    items = []
-    total_before_discount = 0
-    discount = 0
 
-    for product_id, quantity in cart.items():
+    items = []
+    total_before_discount = 0.0
+    discount_total = 0.0
+
+    for product_id, qty in cart.items():
         product = Product.query.get(int(product_id))
-        if product:
-            items.append((product, quantity))
-            total_before_discount += float(product.Price) * quantity
-            discount += float(product.discount_amount) * quantity
+        if not product:
+            continue
+
+        qty = int(qty)
+        items.append((product, qty))
+
+        price = float(product.Price or 0)
+        total_before_discount += price * qty
+        discount_total += float(product.discount_amount) * qty
 
     total_before_discount = round(total_before_discount, 2)
-    discount = round(discount, 2)
-    total = round(total_before_discount - discount, 2)
+    discount_total = round(discount_total, 2)
+    total = round(total_before_discount - discount_total, 2)
 
     return render_template(
         'cart.html',
         items=items,
-        total=total,
         total_before_discount=total_before_discount,
-        discount=discount
+        discount=discount_total,
+        total=total
     )
 
-#-------updated
+
+# ---------------------------
+# Remove item
+# ---------------------------
 @cart_bp.route('/cart/remove/<int:product_id>')
 @login_required
 def remove_from_cart(product_id):
@@ -89,10 +130,10 @@ def remove_from_cart(product_id):
         return redirect(url_for('auth.login'))
 
     cart = get_cart()
-    product_id_str = str(product_id)
+    pid = str(product_id)
 
-    if product_id_str in cart:
-        del cart[product_id_str]
+    if pid in cart:
+        del cart[pid]
         session['cart'] = cart
         session.modified = True
         flash('Item removed from cart.', 'success')
@@ -100,82 +141,103 @@ def remove_from_cart(product_id):
     return redirect(url_for('cart.view_cart'))
 
 
-@cart_bp.route('/checkout', methods=['GET', 'POST'])#------------------upadtated
+# ---------------------------
+# Checkout: PLACE ORDER IMMEDIATELY
+# (customer presses checkout button in cart)
+# ---------------------------
+@cart_bp.route('/checkout', methods=['POST'])
 @login_required
 def checkout():
-    # Check if user is a customer FIRST
     if session.get("user_type") != "customer":
         return redirect(url_for('auth.login'))
 
-    # Also double-check that current_user has Cust_ID attribute
+    # Must be a customer object
     if not hasattr(current_user, 'Cust_ID'):
         logout_user()
         session.clear()
         return redirect(url_for('auth.login'))
 
     cart = get_cart()
-
     if not cart:
         flash('Your cart is empty.', 'error')
-        return redirect(url_for('shop'))
+        return redirect(url_for('cart.view_cart'))
 
-    # Calculate totals (GET part)
-    items = []
-    total_before_discount = 0
-    discount = 0
+    # Build order totals + validate stock again
+    total_before_discount = 0.0
+    discount_total = 0.0
+    total_qty = 0
 
-    for product_id, quantity in cart.items():
+    products_in_cart = []  # store (product, qty)
+    for product_id, qty in cart.items():
         product = Product.query.get(int(product_id))
-        if product:
-            items.append((product, quantity))
-            total_before_discount += float(product.Price) * quantity
-            discount += float(product.discount_amount) * quantity
+        if not product:
+            continue
+
+        qty = int(qty)
+        if qty < 1:
+            continue
+
+        # stock check
+        if qty > (product.stock_qty or 0):
+            flash(f'Not enough stock for {product.Name}. Available: {product.stock_qty}', 'error')
+            return redirect(url_for('cart.view_cart'))
+
+        products_in_cart.append((product, qty))
+
+        price = float(product.Price or 0)
+        total_before_discount += price * qty
+        discount_total += float(product.discount_amount) * qty
+        total_qty += qty
+
+    if not products_in_cart:
+        flash('Your cart is empty.', 'error')
+        return redirect(url_for('cart.view_cart'))
 
     total_before_discount = round(total_before_discount, 2)
-    discount = round(discount, 2)
-    total = round(total_before_discount - discount, 2)
+    discount_total = round(discount_total, 2)
+    final_price = round(total_before_discount - discount_total, 2)
 
-    # POST part (when user confirms / submits checkout)
-    if request.method == 'POST':
-        final_price = total
+    # ⭐ FIX: Assign default employee for online orders
+    default_emp_id = get_default_employee()
 
-        new_order = Orders(
-            Cust_ID=current_user.Cust_ID,
-            Date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            Price=final_price,
-            Discount=discount,
-            Quantity=sum(cart.values())
-        )
-
-        db.session.add(new_order)
-        db.session.flush()
-
-        # Add order items and update product quantities
-        for product_id, quantity in cart.items():
-            product = Product.query.get(int(product_id))
-            if product:
-                order_item = OrderItem(
-                    Order_ID=new_order.Order_ID,
-                    Product_ID=product.Product_ID,
-                    Quantity=quantity
-                )
-                db.session.add(order_item)
-                product.Quantity -= quantity
-
-        db.session.commit()
-
-        # Clear cart
-        session['cart'] = {}
-        session.modified = True
-
-        flash(f'Order placed successfully! Order ID: {new_order.Order_ID}', 'success')
-        return redirect(url_for('shop'))
-
-    # GET view (show checkout page)
-    return render_template(
-        'checkout.html',
-        items=items,
-        total=total,
-        discount=discount,
-        total_before_discount=total_before_discount
+    # Create ONE order row with summed discount
+    new_order = Orders(
+        Cust_ID=current_user.Cust_ID,
+        Emp_ID=default_emp_id,  # ⭐ NOW ORDERS HAVE AN EMPLOYEE
+        Date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        Price=final_price,
+        Discount=discount_total,
+        Quantity=total_qty
     )
+
+    db.session.add(new_order)
+    db.session.flush()  # get new_order.Order_ID without committing yet
+
+    # Insert order items + reduce stock
+    for product, qty in products_in_cart:
+        db.session.add(OrderItem(
+            Order_ID=new_order.Order_ID,
+            Product_ID=product.Product_ID,
+            Quantity=qty
+        ))
+        wi = WarehouseItem.query.filter_by(Product_ID=product.Product_ID).first()
+        if not wi or (wi.Quantity or 0) < qty:
+            flash(f"Not enough stock for {product.Name}", "error")
+            return redirect(url_for('cart.view_cart'))
+        wi.Quantity -= qty
+
+    db.session.commit()
+
+    # Clear cart
+    session['cart'] = {}
+    session.modified = True
+
+    flash(f'Order placed successfully! Order ID: {new_order.Order_ID}', 'success')
+    return redirect(url_for('shop'))
+
+
+# Optional: if someone visits /checkout in browser (GET), redirect to cart
+@cart_bp.route('/checkout', methods=['GET'])
+@login_required
+def checkout_get():
+    return redirect(url_for('cart.view_cart'))

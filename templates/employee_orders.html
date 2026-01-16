@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="{{ url_for('queries.analytics') }}"
+   style="
+      display:inline-block;
+      margin-bottom:15px;
+      padding:8px 14px;
+      background:#444;
+      color:white;
+      text-decoration:none;
+      border-radius:6px;
+   ">
+   ← Back to Analytics
+</a>
+
+<h2>Pending Orders</h2>
+
+{% if orders_details|length == 0 %}
+  <p>No pending orders.</p>
+{% endif %}
+
+{% for order, customer, items in orders_details %}
+  <div style="border:1px solid #444; padding:15px; margin:15px 0; border-radius:10px;">
+    <h3>Order #{{ order.Order_ID }}</h3>
+    <p><b>Customer:</b> {{ customer.Name }}</p>
+    <p><b>Email:</b> {{ customer.Email }}</p>
+    <p><b>Date:</b> {{ order.Date }}</p>
+    <p><b>Total Quantity:</b> {{ order.stock_qty }}</p>
+    <p><b>Total Discount:</b> {{ order.Discount }}</p>
+    <p><b>Final Price:</b> {{ order.Price }}</p>
+    <p><b>Status:</b> {{ order.Status }}</p>
+
+    <hr>
+
+    <h4>Items</h4>
+    <ul>
+      {% for oi, p in items %}
+        <li>
+          {{ p.Name }} — Qty: {{ oi.Quantity }} — Price: {{ p.Price }}
+        </li>
+      {% endfor %}
+    </ul>
+
+    <div style="margin-top:10px; display:flex; gap:10px;">
+      <form action="{{ url_for('employee_orders.accept_order', order_id=order.Order_ID) }}" method="post">
+        <button type="submit">Accept</button>
+      </form>
+
+      <form action="{{ url_for('employee_orders.reject_order', order_id=order.Order_ID) }}" method="post">
+        <button type="submit">Reject</button>
+      </form>
+    </div>
+  </div>
+{% endfor %}
+
+{% endblock %}

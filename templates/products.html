@@ -1,186 +1,175 @@
+<!-- ==================== 6. PRODUCTS.HTML (Employee Management) ==================== -->
 <!DOCTYPE html>
 <html>
 <head>
     <title>Products Management</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         body {
-            font-family: Arial;
-            background: #1a1a1a;
-            margin: 0;
-            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
             color: white;
         }
-
-        /* Sidebar */
         .sidebar {
-            width: 250px;
-            background: #2d2d2d;
+            width: 260px;
+            background: rgba(30, 30, 30, 0.95);
+            backdrop-filter: blur(20px);
             height: 100vh;
             position: fixed;
             left: 0;
             top: 0;
-            border-right: 1px solid #3d3d3d;
-            padding: 20px 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 0;
         }
-
         .sidebar .logo {
             width: 120px;
             display: block;
             margin: 0 auto 30px;
         }
-
         .sidebar h3 {
-            color: white;
             text-align: center;
             margin: 0 0 30px 0;
             font-size: 18px;
+            font-weight: 600;
         }
-
         .sidebar a {
             display: block;
-            padding: 15px 25px;
-            color: #aaa;
+            padding: 14px 24px;
+            color: rgba(255, 255, 255, 0.6);
             text-decoration: none;
-            margin: 5px 15px;
-            border-radius: 0;
-            transition: all 0.3s;
-            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            margin: 4px 16px;
+            border-radius: 10px;
+            font-weight: 500;
         }
-
         .sidebar a:hover {
-            background: #3d3d3d;
+            background: rgba(255, 255, 255, 0.05);
             color: white;
+            transform: translateX(4px);
         }
-
         .sidebar a.active {
             background: white;
             color: black;
-            font-weight: bold;
+            font-weight: 600;
         }
-
         .sidebar .logout {
             position: absolute;
             bottom: 20px;
-            left: 15px;
-            right: 15px;
-            background: #444;
-            color: white;
+            left: 16px;
+            right: 16px;
+            background: rgba(255, 59, 48, 0.2);
             text-align: center;
         }
-
-        .sidebar .logout:hover {
-            background: #555;
-        }
-
-        /* Main Content */
         .main-content {
-            margin-left: 250px;
-            padding: 20px;
+            margin-left: 260px;
+            padding: 30px;
         }
-
         .header {
-            background: #2d2d2d;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #3d3d3d;
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(20px);
+            padding: 20px 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 20px;
         }
-
         .header h2 {
-            color: white;
-            margin: 0;
+            font-weight: 600;
         }
-
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+        .input {
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+        }
+        .input:focus {
+            outline: none;
+            border-color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
         .btn {
+            padding: 10px 20px;
             background: white;
             color: black;
             border: none;
-            padding: 10px 14px;
-            font-weight: bold;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
-            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
         }
-
         .btn:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
         }
-
         .btn-danger {
-            background: #ff4d4d;
-            color: white;
+            background: rgba(255, 59, 48, 0.3);
+            color: #ff6b6b;
         }
-
-        .input {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 8px;
-            border: 1px solid #3d3d3d;
-            background: #1a1a1a;
-            color: white;
+        .btn-danger:hover {
+            background: rgba(255, 59, 48, 0.4);
         }
-
         table {
-            border-collapse: collapse;
             width: 100%;
-            background: #2d2d2d;
-            border: 1px solid #3d3d3d;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        th, td {
-            border: 1px solid #3d3d3d;
-            padding: 12px;
-            text-align: left;
-            vertical-align: middle;
-        }
-
         th {
-            background: #1a1a1a;
-            color: white;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
         }
-
         td {
-            color: #aaa;
+            padding: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
         }
-
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
         .actions {
             display: flex;
             gap: 10px;
         }
-
-        .actions form {
+        td input.input {
+            width: 100%;
+            padding: 8px 12px;
             margin: 0;
         }
-
         .nowrap {
             white-space: nowrap;
         }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <div class="sidebar">
         <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
         <h3>Employee Panel</h3>
-
         <a href="{{ url_for('products') }}" class="active">📦 Products</a>
         <a href="{{ url_for('queries.analytics') }}">📊 Analytics</a>
-
+        <a href="{{ url_for('employee_orders.employee_orders') }}">🧾 Orders</a>
         <a href="{{ url_for('auth.logout') }}" class="logout">Logout</a>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="header">
             <h2>Product Management</h2>
-            <form method="GET" action="{{ url_for('products') }}" style="display:flex; gap:10px; align-items:center;"><!--new-->
-    <input class="input" type="text" name="q" placeholder="Search..." value="{{ q or '' }}" style="width:220px;">
-    <button class="btn" type="submit">Search</button>
-</form><!--new-->
-
+            <form method="GET" action="{{ url_for('products') }}" class="search-form">
+                <input class="input" type="text" name="q" placeholder="Search..." value="{{ q or '' }}" style="width:220px;">
+                <button class="btn" type="submit">Search</button>
+            </form>
             <a href="{{ url_for('product.add_product') }}">
                 <button class="btn">+ Add Product</button>
             </a>
@@ -190,10 +179,9 @@
             <tr>
                 <th class="nowrap">ID</th>
                 <th>Name</th>
-                <th class="nowrap">Price (₪)</th><!--new-->
+                <th class="nowrap">Price (₪)</th>
                 <th class="nowrap">Discount %</th>
-                <th>Barcode</th><!--new-->
-
+                <th>Barcode</th>
                 <th class="nowrap">Quantity</th>
                 <th class="nowrap">Man_ID</th>
                 <th>Image</th>
@@ -204,49 +192,37 @@
             <tr>
                 <form action="{{ url_for('product.update_product', product_id=p.Product_ID) }}" method="post">
                     <td class="nowrap">{{ p.Product_ID }}</td>
-
                     <td>
                         <input class="input" type="text" name="name" value="{{ p.Name }}" required>
                     </td>
-
-                    <td class="nowrap"><!--new-->
-    <input class="input" type="number" step="0.01" name="price"
-           value="{{ '%.2f'|format(p.Price or 0) }}" required>
-</td>
-
-<td class="nowrap">
-    <input class="input" type="number" name="discount_percent"
-           min="0" max="100" value="{{ p.Discount_Percent or 0 }}">
-</td>
-<!--new-->
-                         {% if p.get_discount_percent() > 0 %}
-                           <div style="font-size:12px; color:#7CFC00; margin-top:4px;">
-                           Discount: -{{ p.get_discount_percent() }}% → {{ p.discounted_price }} ₪
-                          </div>
-                         {% endif %}
-
+                    <td class="nowrap">
+                        <input class="input" type="number" step="0.01" name="price"
+                               value="{{ '%.2f'|format(p.Price or 0) }}" required>
                     </td>
-
+                    <td class="nowrap">
+                        <input class="input" type="number" name="discount_percent"
+                               min="0" max="100" value="{{ p.Discount_Percent or 0 }}">
+                        {% if p.get_discount_percent() > 0 %}
+                          <div style="font-size:12px; color:#7CFC00; margin-top:6px;">
+                            Discount: -{{ p.get_discount_percent() }}% → {{ p.discounted_price }} ₪
+                          </div>
+                        {% endif %}
+                    </td>
                     <td>
                         <input class="input" type="text" name="barcode" value="{{ p.Barcode or '' }}">
                     </td>
-
                     <td class="nowrap">
-                        <input class="input" type="number" name="quantity" value="{{ p.Quantity or 0 }}" required>
+                        <input class="input" type="number" name="quantity" value="{{ p.stock_qty or 0 }}" required>
                     </td>
-
                     <td class="nowrap">
                         <input class="input" type="number" name="man_id" value="{{ p.Man_ID or '' }}">
                     </td>
-
                     <td>
                         <input class="input" type="text" name="image" value="{{ p.Image or '' }}">
                     </td>
-
                     <td class="nowrap">
                         <div class="actions">
                             <button type="submit" class="btn">Save</button>
-
                             <a href="{{ url_for('product.delete_product', product_id=p.Product_ID) }}"
                                onclick="return confirm('Delete this product?');">
                                 <button type="button" class="btn btn-danger">Delete</button>

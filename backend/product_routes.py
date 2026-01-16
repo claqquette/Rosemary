@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
-from flask_login import login_required, current_user
-from .models import Product
+from flask_login import login_required
+from .models import Product, WarehouseItem
 from . import db
 
 product_bp = Blueprint('product', __name__)
@@ -17,18 +17,24 @@ def add_product():
         name = request.form.get('name')
         price = request.form.get('price')
         barcode = request.form.get('barcode')
-        quantity = request.form.get('quantity')
-        discount = int(request.form.get("discount_percent", 0))  #NEWW
+        quantity = int(request.form.get('quantity') or 0)
+        discount = int(request.form.get("discount_percent", 0))
 
+        # Create Product (NO Quantity here)
         new_product = Product(
             Name=name,
             Price=float(price),
-            Discount_Percent=discount,  # NEWW
-            Barcode=barcode,
-            Quantity=int(quantity)
+            Discount_Percent=discount,
+            Barcode=barcode
         )
 
         db.session.add(new_product)
+        db.session.flush()  # so we get new_product.Product_ID without committing yet
+
+        # Create WarehouseItem (Quantity lives here)
+        wi = WarehouseItem(Product_ID=new_product.Product_ID, Quantity=quantity)
+        db.session.add(wi)
+
         db.session.commit()
 
         flash('Product added successfully!', 'success')
@@ -47,14 +53,33 @@ def update_product(product_id):
     product = Product.query.get_or_404(product_id)
 
     product.Name = request.form.get('name')
-    product.Price = float(request.form.get('price'))
+    product.Price = float(request.form.get('price') or 0)
     product.Barcode = request.form.get('barcode')
-    product.Quantity = int(request.form.get('quantity'))
-    product.Discount_Percent = int(request.form.get("discount_percent", 0)) #newww
+    product.Discount_Percent = int(request.form.get("discount_percent", 0))
 
-    db.session.commit()
+    # Manufacturer ID (allow empty -> NULL)
+    man_raw = (request.form.get("man_id") or "").strip()
+    product.Man_ID = int(man_raw) if man_raw else None
 
-    flash('Product updated successfully!', 'success')
+    #  Image (if you have it in your form)
+    if hasattr(product, "Image"):
+        product.Image = request.form.get("image")
+
+    #  Quantity goes to WarehouseItem (not Product)
+    qty = int(request.form.get("quantity") or 0)
+    wi = WarehouseItem.query.filter_by(Product_ID=product.Product_ID).first()
+    if not wi:
+        wi = WarehouseItem(Product_ID=product.Product_ID, Quantity=0)
+        db.session.add(wi)
+    wi.Quantity = qty
+
+    try:
+        db.session.commit()
+        flash('Product updated successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Update failed: {e}", "error")
+
     return redirect(url_for('products'))
 
 
@@ -66,6 +91,8 @@ def delete_product(product_id):
         return redirect(url_for('shop'))
 
     product = Product.query.get_or_404(product_id)
+
+    # WarehouseItem will delete automatically if FK has ondelete='CASCADE'
     db.session.delete(product)
     db.session.commit()
 
