@@ -51,7 +51,7 @@ def add_to_cart(product_id):
     return redirect(url_for('shop'))
 
 
-@cart_bp.route('/cart')
+@cart_bp.route('/cart')#-------updated
 @login_required
 def view_cart():
     if session.get("user_type") != "customer":
@@ -59,17 +59,29 @@ def view_cart():
 
     cart = get_cart()
     items = []
-    total = 0
+    total_before_discount = 0
+    discount = 0
 
     for product_id, quantity in cart.items():
         product = Product.query.get(int(product_id))
         if product:
             items.append((product, quantity))
-            total += product.Price * quantity
+            total_before_discount += float(product.Price) * quantity
+            discount += float(product.discount_amount) * quantity
 
-    return render_template('cart.html', items=items, total=total)
+    total_before_discount = round(total_before_discount, 2)
+    discount = round(discount, 2)
+    total = round(total_before_discount - discount, 2)
 
+    return render_template(
+        'cart.html',
+        items=items,
+        total=total,
+        total_before_discount=total_before_discount,
+        discount=discount
+    )
 
+#-------updated
 @cart_bp.route('/cart/remove/<int:product_id>')
 @login_required
 def remove_from_cart(product_id):
@@ -88,7 +100,7 @@ def remove_from_cart(product_id):
     return redirect(url_for('cart.view_cart'))
 
 
-@cart_bp.route('/checkout', methods=['GET', 'POST'])
+@cart_bp.route('/checkout', methods=['GET', 'POST'])#------------------upadtated
 @login_required
 def checkout():
     # Check if user is a customer FIRST
@@ -107,20 +119,26 @@ def checkout():
         flash('Your cart is empty.', 'error')
         return redirect(url_for('shop'))
 
-    # Calculate total
+    # Calculate totals (GET part)
     items = []
-    total = 0
+    total_before_discount = 0
+    discount = 0
+
     for product_id, quantity in cart.items():
         product = Product.query.get(int(product_id))
         if product:
             items.append((product, quantity))
-            total += product.Price * quantity
+            total_before_discount += float(product.Price) * quantity
+            discount += float(product.discount_amount) * quantity
 
+    total_before_discount = round(total_before_discount, 2)
+    discount = round(discount, 2)
+    total = round(total_before_discount - discount, 2)
+
+    # POST part (when user confirms / submits checkout)
     if request.method == 'POST':
-        discount = 0
-        final_price = total - discount
+        final_price = total
 
-        # Create order
         new_order = Orders(
             Cust_ID=current_user.Cust_ID,
             Date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -153,4 +171,11 @@ def checkout():
         flash(f'Order placed successfully! Order ID: {new_order.Order_ID}', 'success')
         return redirect(url_for('shop'))
 
-    return render_template('checkout.html', items=items, total=total)
+    # GET view (show checkout page)
+    return render_template(
+        'checkout.html',
+        items=items,
+        total=total,
+        discount=discount,
+        total_before_discount=total_before_discount
+    )
