@@ -1,4 +1,5 @@
-from flask import Flask, render_template, session, redirect, url_for
+from flask import Flask, render_template, session, redirect, url_for, request #-new request
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 import os
@@ -48,8 +49,14 @@ def create_app():
         if session.get("user_type") != "customer":
             return redirect(url_for("auth.login"))
 
-        # Query already in queries.py - just use simple query here
-        products = Product.query.all()
+        #---------new updated
+        q = request.args.get("q", "").strip()
+        query = Product.query
+        if q:
+            query = query.filter(Product.Name.ilike(f"%{q}%"))
+        products = query.all()
+        return render_template("shop.html", products=products, q=q)#--till here
+
         return render_template("shop.html", products=products)
 
     # -------------------
@@ -60,8 +67,14 @@ def create_app():
         if session.get("user_type") != "employee":
             return redirect(url_for("auth.login"))
 
-        # Query already in queries.py - just use simple query here
-        products = Product.query.all()
+        # ----------------updated
+        q = request.args.get("q", "").strip()
+        query = Product.query
+        if q:
+            query = query.filter(Product.Name.ilike(f"%{q}%"))
+        products = query.all()
+        return render_template("products.html", products=products, q=q)#till here
+
         return render_template("products.html", products=products)
 
     # -------------------

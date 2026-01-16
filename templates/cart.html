@@ -135,34 +135,58 @@
         {% if items %}
             <!-- Cart Table -->
             <table>
-                <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Subtotal</th>
-                    <th>Action</th>
-                </tr>
+    <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+        <th>Action</th>
+    </tr>
 
-                {% for p, qty in items %}
-                <tr>
-                    <td>{{ p.Name }}</td>
-                    <td>{{ "%.2f"|format(p.Price) }} ₪</td>
-                    <td>{{ qty }}</td>
-                    <td>{{ "%.2f"|format(p.Price * qty) }} ₪</td>
-                    <td>
-                        <a href="{{ url_for('cart.remove_from_cart', product_id=p.Product_ID) }}"
-                           class="btn remove-btn">
-                            Remove
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
+    {% for p, qty in items %}
+    <tr>
+        <td>{{ p.Name }}</td>
+
+        <td>
+            {% if p.get_discount_percent() > 0 %}
+                <span style="text-decoration:line-through; opacity:0.6;">
+                    {{ "%.2f"|format(p.Price) }} ₪
+                </span><br>
+                <b style="color:white;">{{ "%.2f"|format(p.discounted_price) }} ₪</b>
+                <span style="color:#7CFC00;">(-{{ p.get_discount_percent() }}%)</span>
+            {% else %}
+                {{ "%.2f"|format(p.Price) }} ₪
+            {% endif %}
+        </td>
+
+        <td>{{ qty }}</td>
+
+        <td>{{ "%.2f"|format(p.discounted_price * qty) }} ₪</td>
+
+        <td>
+            <a href="{{ url_for('cart.remove_from_cart', product_id=p.Product_ID) }}"
+               class="btn remove-btn">
+                Remove
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
 
             <!-- Total -->
-            <div class="total">
-                Total: {{ "%.2f"|format(total) }} ₪
-            </div>
+            <div class="total"> <!--new-->
+    <div style="font-size:16px; color:#aaa;">
+        Total before discount: {{ "%.2f"|format(total_before_discount) }} ₪
+    </div>
+    <div style="font-size:16px; color:#7CFC00;">
+        Discount: -{{ "%.2f"|format(discount) }} ₪
+    </div>
+    <div style="margin-top:8px;">
+        Total: {{ "%.2f"|format(total) }} ₪
+    </div>
+</div>
+<!--new-->
 
             <!-- Buttons -->
             <div style="text-align: center;">

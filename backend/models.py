@@ -23,6 +23,22 @@ class Manufacturer(db.Model):
 class Product(db.Model):
     __tablename__ = 'Product'
 
+    #--------------------------------------------------------------new updated
+
+    def get_discount_percent(self) -> int:
+        return int(self.Discount_Percent or 0)
+
+    @property
+    def discounted_price(self) -> float:
+        p = float(self.Price or 0)
+        d = self.get_discount_percent()
+        return round(p * (1 - d / 100), 2)
+
+    @property
+    def discount_amount(self) -> float:
+        return round(float(self.Price or 0) - self.discounted_price, 2)
+
+    #-----------------------------------------------------------------------------------------------updated
     Product_ID = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
 
     Man_ID = db.Column(
@@ -37,7 +53,7 @@ class Product(db.Model):
     Quantity = db.Column(db.Integer)
 
     Image = db.Column(db.String(255), nullable=True)
-
+    Discount_Percent = db.Column(db.Integer, default=0)  #  NEW
     warehouse_item = db.relationship(
         'WarehouseItem',
         backref=db.backref('product', uselist=False),
