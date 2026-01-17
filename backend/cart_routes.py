@@ -7,43 +7,17 @@ from datetime import datetime
 cart_bp = Blueprint('cart', __name__)
 
 
-# ---------------------------
 # Helper: get cart from session
-# ---------------------------
 def get_cart():
     if 'cart' not in session or not isinstance(session['cart'], dict):
         session['cart'] = {}
     return session['cart']
 
 
-# ---------------------------
-# Helper: Get or create default employee for online orders
-# ---------------------------
-def get_default_employee():
-    """Get the default 'Online System' employee for customer self-checkout orders"""
-    default_emp = Employee.query.filter_by(Email='system@rosemary.emp').first()
-
-    if not default_emp:
-        # Create default system employee if it doesn't exist
-        default_emp = Employee(
-            Name='Online System',
-            Email='system@rosemary.emp',
-            Password='system_only_no_login',  # Should use hashing in production
-            Phone_Num='0000000000',
-            Address='System'
-        )
-        db.session.add(default_emp)
-        db.session.commit()
-
-    return default_emp.Emp_ID
-
-
-# ---------------------------
 # Add to cart
-# ---------------------------
+
 @cart_bp.route('/cart/add/<int:product_id>', methods=['POST'])
 def add_to_cart(product_id):
-    # Must be logged in as customer
     if not current_user.is_authenticated or session.get("user_type") != "customer":
         return redirect(url_for('auth.login'))
 
@@ -80,9 +54,8 @@ def add_to_cart(product_id):
     return redirect(url_for('shop'))
 
 
-# ---------------------------
+
 # View cart
-# ---------------------------
 @cart_bp.route('/cart')
 @login_required
 def view_cart():
@@ -120,9 +93,7 @@ def view_cart():
     )
 
 
-# ---------------------------
 # Remove item
-# ---------------------------
 @cart_bp.route('/cart/remove/<int:product_id>')
 @login_required
 def remove_from_cart(product_id):
@@ -141,10 +112,9 @@ def remove_from_cart(product_id):
     return redirect(url_for('cart.view_cart'))
 
 
-# ---------------------------
-# Checkout: PLACE ORDER IMMEDIATELY
+
 # (customer presses checkout button in cart)
-# ---------------------------
+
 @cart_bp.route('/checkout', methods=['POST'])
 @login_required
 def checkout():
@@ -162,7 +132,6 @@ def checkout():
         flash('Your cart is empty.', 'error')
         return redirect(url_for('cart.view_cart'))
 
-    # Build order totals + validate stock again
     total_before_discount = 0.0
     discount_total = 0.0
 
@@ -196,23 +165,21 @@ def checkout():
     final_price = round(total_before_discount - discount_total, 2)
 
     # Assign default employee for online orders
-    default_emp_id = get_default_employee()
+   # default_emp_id = get_default_employee()
 
     #  Quantity field (it will be calculated from OrderItem)
     new_order = Orders(
         Cust_ID=current_user.Cust_ID,
-        Emp_ID=default_emp_id,
+        #Emp_ID=default_emp_id,
         Date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         Price=final_price,
         Discount=discount_total
     )
 
     db.session.add(new_order)
-    db.session.flush()  # get new_order.Order_ID without committing yet
+    db.session.flush()
 
-    # Insert order items + reduce stock
     for product, qty in products_in_cart:
-        #  Quantity is stored HERE in OrderItem
         db.session.add(OrderItem(
             Order_ID=new_order.Order_ID,
             Product_ID=product.Product_ID,
@@ -226,7 +193,6 @@ def checkout():
 
     db.session.commit()
 
-    # Clear cart
     session['cart'] = {}
     session.modified = True
 
@@ -234,7 +200,7 @@ def checkout():
     return redirect(url_for('shop'))
 
 
-# Optional: if someone visits /checkout in browser (GET), redirect to cart
+# if someone visits /checkout in browser (GET), redirect to cart
 @cart_bp.route('/checkout', methods=['GET'])
 @login_required
 def checkout_get():

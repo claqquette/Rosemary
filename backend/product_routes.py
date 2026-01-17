@@ -98,9 +98,17 @@ def delete_product(product_id):
 
     product = Product.query.get_or_404(product_id)
 
-    # WarehouseItem will delete automatically if FK has ondelete='CASCADE'
-    db.session.delete(product)
-    db.session.commit()
+    try:
+        # 1) delete warehouse row first (prevents Product_ID -> NULL problem)
+        wi = WarehouseItem.query.filter_by(Product_ID=product_id).first()
+        if wi:
+            db.session.delete(wi)
+        db.session.delete(product)
+        db.session.commit()
+        flash('Product deleted successfully!', 'success')
 
-    flash('Product deleted successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Delete failed: {e}", "error")
+
     return redirect(url_for('products'))

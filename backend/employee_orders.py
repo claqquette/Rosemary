@@ -77,7 +77,6 @@ def reject_order(order_id):
     for it in items:
         wi = WarehouseItem.query.filter_by(Product_ID=it.Product_ID).first()
 
-        # If WarehouseItem row doesn't exist for some reason, create it
         if not wi:
             wi = WarehouseItem(Product_ID=it.Product_ID, Quantity=0)
             db.session.add(wi)

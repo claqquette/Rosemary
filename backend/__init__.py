@@ -21,14 +21,11 @@ def create_app():
 
     db.init_app(app)
 
-    # -------------------
     # LOGIN MANAGER
-    # -------------------
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
-    # Import models ONLY after db is ready
     from .models import Employee, Customer, Product
 
     @login_manager.user_loader
@@ -40,20 +37,15 @@ def create_app():
         elif user_type == "customer":
             return Customer.query.get(int(user_id))
 
-        # fallback
         return Customer.query.get(int(user_id)) or Employee.query.get(int(user_id))
 
-    # -------------------
     # LANDING PAGE
-    # -------------------
     @app.route("/")
     def landing():
         session.pop('_flashes', None)
         return render_template("landing.html")
 
-    # -------------------
-    # CUSTOMER SHOP
-    # -------------------
+    #  SHOP
     @app.route("/shop")
     def shop():
         if session.get("user_type") != "customer":
@@ -67,9 +59,7 @@ def create_app():
 
         return render_template("shop.html", products=products, q=q)
 
-    # -------------------
     # EMPLOYEE PRODUCTS
-    # -------------------
     @app.route("/products")
     def products():
         if session.get("user_type") != "employee":
@@ -83,9 +73,7 @@ def create_app():
 
         return render_template("products.html", products=products, q=q)
 
-    # -------------------
     # REGISTER BLUEPRINTS
-    # -------------------
     from .auth import auth
     app.register_blueprint(auth)
 
@@ -98,18 +86,14 @@ def create_app():
     from .queries import queries_bp
     app.register_blueprint(queries_bp)
 
-    #  Register employee orders blueprint INSIDE create_app (prevents circular import)
     from .employee_orders import employee_orders_bp
     app.register_blueprint(employee_orders_bp)
 
-    # -------------------
-    # DB INIT
-    # -------------------
+
     with app.app_context():
         db.create_all()
 
-        # import here to avoid circular import
-        from .seed import seed_products
+        from .seed import seed_products#SEED TO MAKE IT EASIER
         seed_products()
 
     return app

@@ -118,7 +118,7 @@ class Employee(db.Model, UserMixin):
     Email = db.Column(db.String(50), unique=True)
     Password = db.Column(db.String(50))
 
-    # One employee → many orders
+    # One employee to many orders
     orders = db.relationship(
         'Orders',
         backref=db.backref('employee'),
@@ -152,7 +152,7 @@ class Orders(db.Model):
     Discount = db.Column(db.Float)
     Status = db.Column(db.String(20), default="pending")  # pending / accepted / rejected
 
-    # One order → many order items
+    # One order to many order items
     order_items = db.relationship(
         'OrderItem',
         backref=db.backref('order'),
@@ -169,7 +169,7 @@ class Orders(db.Model):
         return total or 0
 
 
-# OrderItem Table (M–N link: Orders ↔ Product)
+# OrderItem Table (M–N link: Orders to Product)
 class OrderItem(db.Model):
     __tablename__ = 'Order_Item'
 

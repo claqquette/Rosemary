@@ -13,9 +13,7 @@ def analytics():
     if session.get("user_type") != "employee":
         return redirect(url_for('shop'))
 
-    # ---------------------------
-    # Dynamic inputs (from URL)
-    # ---------------------------
+    # Dynamic inputs
     customer_id = request.args.get("customer_id", type=int)                 # Query 4
     employee_id = request.args.get("employee_id", type=int)                 # Query 5 (optional)
     manufacturer_id = request.args.get("manufacturer_id", type=int)         # Query 8
@@ -24,9 +22,7 @@ def analytics():
     start_date = request.args.get("start_date")                             # Query 17
     end_date = request.args.get("end_date")                                 # Query 17
 
-    # ==========================
-    # 1) All products (+ warehouse quantity)
-    # ==========================
+    # 1) All products
     try:
         all_products = (
             db.session.query(
@@ -44,9 +40,7 @@ def analytics():
         print(f"Error in query 1: {e}")
         all_products = []
 
-    # ==========================
     # 2) All customers
-    # ==========================
     try:
         all_customers = (
             db.session.query(
@@ -62,9 +56,7 @@ def analytics():
         print(f"Error in query 2: {e}")
         all_customers = []
 
-    # ==========================
     # 3) All employees
-    # ==========================
     try:
         all_employees = (
             db.session.query(
@@ -81,9 +73,8 @@ def analytics():
         print(f"Error in query 3: {e}")
         all_employees = []
 
-    # ==========================
     # 4) Orders by customer (dynamic)
-    # ==========================
+
     try:
         if customer_id:
             customer_orders = (
@@ -98,10 +89,7 @@ def analytics():
         print(f"Error in query 4: {e}")
         customer_orders = []
 
-    # ==========================
     # 5) Orders by employee (dynamic, optional)
-    # NOTE: Quantity is calculated via order.total_quantity property in template
-    # ==========================
     try:
         if employee_id:
             employee_orders = (
@@ -116,9 +104,7 @@ def analytics():
         print(f"Error in query 5: {e}")
         employee_orders = []
 
-    # ==========================
     # 6) Total orders per customer
-    # ==========================
     try:
         orders_per_customer = (
             db.session.query(
@@ -135,9 +121,7 @@ def analytics():
         print(f"Error in query 6: {e}")
         orders_per_customer = []
 
-    # ==========================
     # 7) Total warehouse value
-    # ==========================
     try:
         total_warehouse_value = (
             db.session.query(
@@ -150,9 +134,8 @@ def analytics():
         print(f"Error in query 7: {e}")
         total_warehouse_value = 0
 
-    # ==========================
     # 8) Products by manufacturer (dynamic)
-    # ==========================
+
     try:
         if manufacturer_id:
             products_by_manufacturer = (
@@ -172,18 +155,16 @@ def analytics():
         print(f"Error in query 8: {e}")
         products_by_manufacturer = []
 
-    # ==========================
     # 9) Average product price
-    # ==========================
+
     try:
         average_price = db.session.query(func.avg(Product.Price)).scalar() or 0
     except Exception as e:
         print(f"Error in query 9: {e}")
         average_price = 0
 
-    # ==========================
+
     # 10) Customers who ONLY buy discounted orders, they have no order with net discount=0
-    # ==========================
     try:
         discount_only_customers = (
             db.session.query(
@@ -205,9 +186,7 @@ def analytics():
         print(f"Error in query 10: {e}")
         discount_only_customers = []
 
-    # ==========================
     # 11) Available products in warehouse
-    # ==========================
     try:
         available_products = (
             db.session.query(
@@ -225,9 +204,7 @@ def analytics():
         print(f"Error in query 11: {e}")
         available_products = []
 
-    # ==========================
     # 12) Low stock products (dynamic threshold)
-    # ==========================
     try:
         low_stock_products = (
             db.session.query(
@@ -245,9 +222,7 @@ def analytics():
         print(f"Error in query 12: {e}")
         low_stock_products = []
 
-    # ==========================
     # 13) Manufacturer of a product (dynamic product_id)
-    # ==========================
     try:
         if product_id:
             product_manufacturer = (
@@ -267,9 +242,7 @@ def analytics():
         print(f"Error in query 13: {e}")
         product_manufacturer = None
 
-    # ==========================
     # 14) Top spending customer
-    # ==========================
     try:
         top_spending_customer = (
             db.session.query(
@@ -287,9 +260,7 @@ def analytics():
         print(f"Error in query 14: {e}")
         top_spending_customer = None
 
-    # ==========================
     # 15) Customer with most orders
-    # ==========================
     try:
         most_orders_customer = (
             db.session.query(
@@ -307,9 +278,7 @@ def analytics():
         print(f"Error in query 15: {e}")
         most_orders_customer = None
 
-    # ==========================
     # 16) Most recent order
-    # ==========================
     try:
         most_recent_order = (
             db.session.query(
@@ -326,9 +295,7 @@ def analytics():
         print(f"Error in query 16: {e}")
         most_recent_order = None
 
-    # ==========================
     # 17) Orders in date range (dynamic)
-    # ==========================
     try:
         if start_date and end_date:
             orders_in_date_range = (
@@ -344,9 +311,7 @@ def analytics():
         print(f"Error in query 17: {e}")
         orders_in_date_range = []
 
-    # ==========================
     # 18) Top selling employee (accepted orders only)
-    # ==========================
     try:
         top_selling_employee = (
             db.session.query(
@@ -366,9 +331,7 @@ def analytics():
         print(f"Error in query 18: {e}")
         top_selling_employee = None
 
-    # ==========================
     # 19) Products with manufacturer names
-    # ==========================
     try:
         products_with_manufacturers = (
             db.session.query(
