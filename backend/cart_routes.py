@@ -165,7 +165,6 @@ def checkout():
     # Build order totals + validate stock again
     total_before_discount = 0.0
     discount_total = 0.0
-    total_qty = 0
 
     products_in_cart = []  # store (product, qty)
     for product_id, qty in cart.items():
@@ -187,7 +186,6 @@ def checkout():
         price = float(product.Price or 0)
         total_before_discount += price * qty
         discount_total += float(product.discount_amount) * qty
-        total_qty += qty
 
     if not products_in_cart:
         flash('Your cart is empty.', 'error')
@@ -197,17 +195,16 @@ def checkout():
     discount_total = round(discount_total, 2)
     final_price = round(total_before_discount - discount_total, 2)
 
-    # ⭐ FIX: Assign default employee for online orders
+    # Assign default employee for online orders
     default_emp_id = get_default_employee()
 
-    # Create ONE order row with summed discount
+    #  Quantity field (it will be calculated from OrderItem)
     new_order = Orders(
         Cust_ID=current_user.Cust_ID,
-        Emp_ID=default_emp_id,  # ⭐ NOW ORDERS HAVE AN EMPLOYEE
+        Emp_ID=default_emp_id,
         Date=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         Price=final_price,
-        Discount=discount_total,
-        Quantity=total_qty
+        Discount=discount_total
     )
 
     db.session.add(new_order)
@@ -215,6 +212,7 @@ def checkout():
 
     # Insert order items + reduce stock
     for product, qty in products_in_cart:
+        #  Quantity is stored HERE in OrderItem
         db.session.add(OrderItem(
             Order_ID=new_order.Order_ID,
             Product_ID=product.Product_ID,

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session
 from flask_login import login_required
 from sqlalchemy import func, desc
+from sqlalchemy import case
 from .models import Product, Customer, Employee, Orders, OrderItem, Manufacturer, WarehouseItem
 from . import db
 
@@ -86,14 +87,7 @@ def analytics():
     try:
         if customer_id:
             customer_orders = (
-                db.session.query(
-                    Orders.Order_ID,
-                    Orders.Date,
-                    Orders.Price,
-                    Orders.Quantity,
-                    Orders.Discount,
-                    Orders.Status
-                )
+                db.session.query(Orders)
                 .filter(Orders.Cust_ID == customer_id)
                 .order_by(Orders.Order_ID.desc())
                 .all()
@@ -106,18 +100,12 @@ def analytics():
 
     # ==========================
     # 5) Orders by employee (dynamic, optional)
+    # NOTE: Quantity is calculated via order.total_quantity property in template
     # ==========================
     try:
         if employee_id:
             employee_orders = (
-                db.session.query(
-                    Orders.Order_ID,
-                    Orders.Date,
-                    Orders.Price,
-                    Orders.Quantity,
-                    Orders.Discount,
-                    Orders.Status
-                )
+                db.session.query(Orders)
                 .filter(Orders.Emp_ID == employee_id)
                 .order_by(Orders.Order_ID.desc())
                 .all()
@@ -194,25 +182,28 @@ def analytics():
         average_price = 0
 
     # ==========================
-    # 10) Orders with discount
+    # 10) Customers who ONLY buy discounted orders, they have no order with net discount=0
     # ==========================
     try:
-        orders_with_discount = (
+        discount_only_customers = (
             db.session.query(
-                Orders.Order_ID,
-                Orders.Date,
-                Orders.Price,
-                Orders.Discount,
-                Customer.Name
+                Customer.Cust_ID,
+                Customer.Name,
+                Customer.Email,
+                func.count(Orders.Order_ID).label("total_orders"),
+                func.min(Orders.Discount).label("min_discount")
             )
-            .join(Customer, Customer.Cust_ID == Orders.Cust_ID)
-            .filter(Orders.Discount > 0)
-            .order_by(Orders.Order_ID.desc())
+            .join(Orders, Orders.Cust_ID == Customer.Cust_ID)
+            .filter(Orders.Status == "accepted")
+            .group_by(Customer.Cust_ID, Customer.Name, Customer.Email)
+            .having(func.min(Orders.Discount) > 0)
+            .order_by(desc("total_orders"))
             .all()
         )
+
     except Exception as e:
         print(f"Error in query 10: {e}")
-        orders_with_discount = []
+        discount_only_customers = []
 
     # ==========================
     # 11) Available products in warehouse
@@ -341,13 +332,7 @@ def analytics():
     try:
         if start_date and end_date:
             orders_in_date_range = (
-                db.session.query(
-                    Orders.Order_ID,
-                    Orders.Date,
-                    Orders.Price,
-                    Orders.Status,
-                    Customer.Name
-                )
+                db.session.query(Orders, Customer.Name)
                 .join(Customer, Customer.Cust_ID == Orders.Cust_ID)
                 .filter(Orders.Date >= start_date, Orders.Date <= end_date)
                 .order_by(Orders.Date.desc())
@@ -400,23 +385,29 @@ def analytics():
         print(f"Error in query 19: {e}")
         products_with_manufacturers = []
 
-    # ==========================
-    # 20) Monthly sales
-    # ==========================
-    try:
-        monthly_sales = (
-            db.session.query(
-                func.date_format(Orders.Date, '%Y-%m').label('month'),
-                func.sum(Orders.Price).label('total_sales'),
-                func.count(Orders.Order_ID).label('order_count')
-            )
-            .group_by(func.date_format(Orders.Date, '%Y-%m'))
-            .order_by('month')
-            .all()
+    # 20. Customers who spent more than average
+
+    # First: total spent per customer
+    subquery = (
+        db.session.query(
+            Orders.Cust_ID,
+            func.sum(Orders.Price).label("total_spent")
         )
-    except Exception as e:
-        print(f"Error in query 20: {e}")
-        monthly_sales = []
+        .group_by(Orders.Cust_ID)
+        .subquery()
+    )
+
+    # Second: average of total spent
+    avg_spent = db.session.query(func.avg(subquery.c.total_spent)).scalar()
+
+    # Final: customers above average
+    customers_above_avg = (
+        db.session.query(Customer, subquery.c.total_spent)
+        .join(subquery, Customer.Cust_ID == subquery.c.Cust_ID)
+        .filter(subquery.c.total_spent > avg_spent)
+        .order_by(subquery.c.total_spent.desc())
+        .all()
+    )
 
     return render_template(
         'analytics.html',
@@ -430,7 +421,7 @@ def analytics():
         total_warehouse_value=total_warehouse_value,
         products_by_manufacturer=products_by_manufacturer,
         average_price=average_price,
-        orders_with_discount=orders_with_discount,
+        discount_only_customers=discount_only_customers,
         available_products=available_products,
         low_stock_products=low_stock_products,
         product_manufacturer=product_manufacturer,
@@ -440,7 +431,7 @@ def analytics():
         orders_in_date_range=orders_in_date_range,
         top_selling_employee=top_selling_employee,
         products_with_manufacturers=products_with_manufacturers,
-        monthly_sales=monthly_sales,
+        customers_above_avg=customers_above_avg,
 
         # keep input values so the form stays filled after submit
         customer_id=customer_id,

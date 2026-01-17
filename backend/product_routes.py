@@ -12,24 +12,30 @@ def add_product():
     if session.get("user_type") != "employee":
         flash('Access denied. Employees only.', 'error')
         return redirect(url_for('shop'))
-
+#get data from inputs
     if request.method == 'POST':
         name = request.form.get('name')
         price = request.form.get('price')
         barcode = request.form.get('barcode')
         quantity = int(request.form.get('quantity') or 0)
         discount = int(request.form.get("discount_percent", 0))
+        man_id_raw = (request.form.get('man_id') or '').strip()
+        man_id = int(man_id_raw) if man_id_raw else None
+        image = (request.form.get('image') or '').strip()
+        image = image if image else None
 
-        # Create Product (NO Quantity here)
+        # Create Product with ALL fields
         new_product = Product(
             Name=name,
             Price=float(price),
             Discount_Percent=discount,
-            Barcode=barcode
+            Barcode=barcode,
+            Man_ID=man_id,
+            Image=image
         )
 
         db.session.add(new_product)
-        db.session.flush()  # so we get new_product.Product_ID without committing yet
+        db.session.flush()
 
         # Create WarehouseItem (Quantity lives here)
         wi = WarehouseItem(Product_ID=new_product.Product_ID, Quantity=quantity)
@@ -61,11 +67,11 @@ def update_product(product_id):
     man_raw = (request.form.get("man_id") or "").strip()
     product.Man_ID = int(man_raw) if man_raw else None
 
-    #  Image (if you have it in your form)
-    if hasattr(product, "Image"):
-        product.Image = request.form.get("image")
+    # Image (allow empty -> NULL)
+    image_raw = (request.form.get("image") or "").strip()
+    product.Image = image_raw if image_raw else None
 
-    #  Quantity goes to WarehouseItem (not Product)
+    # Quantity goes to WarehouseItem (not Product)
     qty = int(request.form.get("quantity") or 0)
     wi = WarehouseItem.query.filter_by(Product_ID=product.Product_ID).first()
     if not wi:

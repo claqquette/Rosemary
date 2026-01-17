@@ -222,59 +222,60 @@
 
         <!-- 4 -->
         <div class="section">
-            <h2>4. Orders by Customer</h2>
-            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
-                <input type="number" name="customer_id" placeholder="Customer ID" value="{{ customer_id or '' }}">
-                <button type="submit">Search</button>
-                <span class="hint">Enter customer ID to show their orders</span>
-            </form>
+    <h2>4. Orders by Customer</h2>
+    <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
+        <input type="number" name="customer_id" placeholder="Customer ID" value="{{ customer_id or '' }}">
+        <button type="submit">Search</button>
+        <span class="hint">Enter customer ID to show their orders</span>
+    </form>
 
-            {% if customer_orders %}
-            <table>
-                <tr><th>Order ID</th><th>Date</th><th>Price</th><th>Qty</th><th>Discount</th><th>Status</th></tr>
-                {% for o in customer_orders %}
-                <tr>
-                    <td>{{ o.Order_ID }}</td>
-                    <td>{{ o.Date }}</td>
-                    <td>{{ "%.2f"|format(o.Price) }} ₪</td>
-                    <td>{{ o.Quantity }}</td>
-                    <td>{{ "%.2f"|format(o.Discount) }} ₪</td>
-                    <td>{{ o.Status }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            {% else %}
-            <p class="no-data">Enter a customer ID to view orders.</p>
-            {% endif %}
-        </div>
+    {% if customer_orders %}
+    <table>
+        <tr><th>Order ID</th><th>Date</th><th>Price</th><th>Qty</th><th>Discount</th><th>Status</th></tr>
+        {% for o in customer_orders %}
+        <tr>
+            <td>{{ o.Order_ID }}</td>
+            <td>{{ o.Date }}</td>
+            <td>{{ "%.2f"|format(o.Price) }} ₪</td>
+            <td>{{ o.total_quantity }}</td>
+            <td>{{ "%.2f"|format(o.Discount) }} ₪</td>
+            <td>{{ o.Status }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="no-data">Enter a customer ID to view orders.</p>
+    {% endif %}
+</div>
 
-        <!-- 5 -->
-        <div class="section">
-            <h2>5. Orders Handled by Employee</h2>
-            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
-                <input type="number" name="employee_id" placeholder="Employee ID" value="{{ employee_id or '' }}">
-                <button type="submit">Search</button>
-                <span class="hint">Enter employee ID to show orders they handled</span>
-            </form>
+<!-- Update section 5 in analytics.html -->
+<div class="section">
+    <h2>5. Orders Handled by Employee</h2>
+    <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
+        <input type="number" name="employee_id" placeholder="Employee ID" value="{{ employee_id or '' }}">
+        <button type="submit">Search</button>
+        <span class="hint">Enter employee ID to show orders they handled</span>
+    </form>
 
-            {% if employee_orders %}
-            <table>
-                <tr><th>Order ID</th><th>Date</th><th>Price</th><th>Qty</th><th>Discount</th><th>Status</th></tr>
-                {% for o in employee_orders %}
-                <tr>
-                    <td>{{ o.Order_ID }}</td>
-                    <td>{{ o.Date }}</td>
-                    <td>{{ "%.2f"|format(o.Price) }} ₪</td>
-                    <td>{{ o.Quantity }}</td>
-                    <td>{{ "%.2f"|format(o.Discount) }} ₪</td>
-                    <td>{{ o.Status }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            {% else %}
-            <p class="no-data">Enter an employee ID to view handled orders.</p>
-            {% endif %}
-        </div>
+    {% if employee_orders %}
+    <table>
+        <tr><th>Order ID</th><th>Date</th><th>Price</th><th>Qty</th><th>Discount</th><th>Status</th></tr>
+        {% for o in employee_orders %}
+        <tr>
+            <td>{{ o.Order_ID }}</td>
+            <td>{{ o.Date }}</td>
+            <td>{{ "%.2f"|format(o.Price) }} ₪</td>
+            <td>{{ o.total_quantity }}</td>
+            <td>{{ "%.2f"|format(o.Discount) }} ₪</td>
+            <td>{{ o.Status }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="no-data">Enter an employee ID to view handled orders.</p>
+    {% endif %}
+</div>
+
 
         <!-- 6 -->
         <div class="section">
@@ -328,26 +329,32 @@
             </div>
         </div>
 
-        <!-- 10 -->
-        <div class="section">
-            <h2>10. Orders with Discount</h2>
-            {% if orders_with_discount %}
-            <table>
-                <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Price</th><th>Discount</th></tr>
-                {% for o in orders_with_discount %}
-                <tr>
-                    <td>{{ o.Order_ID }}</td>
-                    <td>{{ o.Date }}</td>
-                    <td>{{ o.Name }}</td>
-                    <td>{{ "%.2f"|format(o.Price) }} ₪</td>
-                    <td>{{ "%.2f"|format(o.Discount) }} ₪</td>
-                </tr>
-                {% endfor %}
-            </table>
-            {% else %}
-            <p class="no-data">No orders with discount</p>
-            {% endif %}
-        </div>
+       <!-- 10 -->
+<div class="section">
+  <h2>10. Customers Who Only Buy Discounted Orders</h2>
+
+  {% if discount_only_customers %}
+  <table>
+    <tr>
+      <th>Customer ID</th><th>Name</th><th>Email</th>
+      <th>Total Orders</th><th>Min Discount</th>
+    </tr>
+    {% for c in discount_only_customers %}
+    <tr>
+      <td>{{ c.Cust_ID }}</td>
+      <td>{{ c.Name }}</td>
+      <td>{{ c.Email }}</td>
+      <td>{{ c.total_orders }}</td>
+      <td>{{ "%.2f"|format(c.min_discount) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+    <p class="no-data">No customers found where ALL orders have a discount.</p>
+  {% endif %}
+</div>
+
+
 
         <!-- 11 -->
         <div class="section">
@@ -455,34 +462,34 @@
         </div>
 
         <!-- 17 -->
-        <div class="section">
-            <h2>17. Orders in Date Range</h2>
-            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
-                <span class="hint">From</span>
-                <input type="date" name="start_date" value="{{ start_date or '' }}">
-                <span class="hint">To</span>
-                <input type="date" name="end_date" value="{{ end_date or '' }}">
-                <button type="submit">Filter</button>
-            </form>
+      <div class="section">
+    <h2>17. Orders in Date Range</h2>
+    <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
+        <span class="hint">From</span>
+        <input type="date" name="start_date" value="{{ start_date or '' }}">
+        <span class="hint">To</span>
+        <input type="date" name="end_date" value="{{ end_date or '' }}">
+        <button type="submit">Filter</button>
+    </form>
 
-            {% if orders_in_date_range %}
-            <table>
-                <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Price</th><th>Status</th></tr>
-                {% for o in orders_in_date_range %}
-                <tr>
-                    <td>{{ o.Order_ID }}</td>
-                    <td>{{ o.Date }}</td>
-                    <td>{{ o.Name }}</td>
-                    <td>{{ "%.2f"|format(o.Price) }} ₪</td>
-                    <td>{{ o.Status }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            {% else %}
-            <p class="no-data">Select a start/end date to show orders.</p>
-            {% endif %}
-        </div>
-
+    {% if orders_in_date_range %}
+    <table>
+        <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Price</th><th>Qty</th><th>Status</th></tr>
+        {% for o in orders_in_date_range %}
+        <tr>
+            <td>{{ o.Order_ID }}</td>
+            <td>{{ o.Date }}</td>
+            <td>{{ o.customer.Name }}</td>
+            <td>{{ "%.2f"|format(o.Price) }} ₪</td>
+            <td>{{ o.total_quantity }}</td>
+            <td>{{ o.Status }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="no-data">Select a start/end date to show orders.</p>
+    {% endif %}
+</div>
         <!-- 18 -->
         <div class="section">
             <h2>18. Top Selling Employee</h2>
@@ -517,24 +524,32 @@
             {% endif %}
         </div>
 
-        <!-- 20 -->
-        <div class="section">
-            <h2>20. Monthly Sales</h2>
-            {% if monthly_sales %}
-            <table>
-                <tr><th>Month</th><th>Total Sales</th><th>Order Count</th></tr>
-                {% for m in monthly_sales %}
-                <tr>
-                    <td>{{ m.month }}</td>
-                    <td>{{ "%.2f"|format(m.total_sales) }} ₪</td>
-                    <td>{{ m.order_count }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            {% else %}
-            <p class="no-data">No sales data</p>
-            {% endif %}
-        </div>
+       <!-- 20 -->
+<div class="section">
+    <h2>20. Customers Who Spent More Than Average</h2>
+
+    {% if customers_above_avg %}
+    <table>
+        <tr>
+            <th>Customer ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Total Spent</th>
+        </tr>
+        {% for c, total in customers_above_avg %}
+        <tr>
+            <td>{{ c.Cust_ID }}</td>
+            <td>{{ c.Name }}</td>
+            <td>{{ c.Email }}</td>
+            <td>{{ "%.2f"|format(total) }} ₪</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="no-data">No customers found above average spending.</p>
+    {% endif %}
+</div>
+
     </div>
 </body>
 </html>

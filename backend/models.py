@@ -1,5 +1,6 @@
 from . import db
 from flask_login import UserMixin
+from sqlalchemy import func
 
 
 # MANIFACTURER Table
@@ -36,8 +37,6 @@ class Product(db.Model):
     def discount_amount(self) -> float:
         return round(float(self.Price or 0) - self.discounted_price, 2)
 
-
-    #-----------------------------------------------------------------------------------------------updated
     Product_ID = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
 
     Man_ID = db.Column(
@@ -49,7 +48,8 @@ class Product(db.Model):
     Name = db.Column(db.String(120))
     Price = db.Column(db.Float)
     Barcode = db.Column(db.String(120))
-#get quantity from warehouse item
+
+    # Get quantity from warehouse item
     @property
     def stock_qty(self):
         wi = WarehouseItem.query.filter_by(Product_ID=self.Product_ID).first()
@@ -70,7 +70,6 @@ class Product(db.Model):
     )
 
 
-
 # WarehouseItem Table (1–1 with Product)
 class WarehouseItem(db.Model):
     __tablename__ = 'WarehouseItem'
@@ -86,7 +85,7 @@ class WarehouseItem(db.Model):
 
 
 # Customer Table
-class Customer(db.Model, UserMixin):  # Add UserMixin here
+class Customer(db.Model, UserMixin):
     __tablename__ = 'Customer'
 
     Cust_ID = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
@@ -108,7 +107,6 @@ class Customer(db.Model, UserMixin):  # Add UserMixin here
 
 
 # Employee Table (Login User)
-
 class Employee(db.Model, UserMixin):
     __tablename__ = 'Employee'
 
@@ -132,9 +130,7 @@ class Employee(db.Model, UserMixin):
         return str(self.Emp_ID)
 
 
-
 # Orders Table
-
 class Orders(db.Model):
     __tablename__ = 'Orders'
 
@@ -151,7 +147,6 @@ class Orders(db.Model):
         nullable=True
     )
 
-    Quantity = db.Column(db.Integer)
     Date = db.Column(db.String(50))
     Price = db.Column(db.Float)
     Discount = db.Column(db.Float)
@@ -164,10 +159,17 @@ class Orders(db.Model):
         lazy=True
     )
 
+    # newww Calculate total quantity from OrderItem
+    @property
+    def total_quantity(self):
+        """Calculate total quantity from order items"""
+        total = db.session.query(func.sum(OrderItem.Quantity))\
+            .filter(OrderItem.Order_ID == self.Order_ID)\
+            .scalar()
+        return total or 0
 
 
 # OrderItem Table (M–N link: Orders ↔ Product)
-
 class OrderItem(db.Model):
     __tablename__ = 'Order_Item'
 
