@@ -299,7 +299,13 @@ def analytics():
     try:
         if start_date and end_date:
             orders_in_date_range = (
-                db.session.query(Orders, Customer.Name)
+                db.session.query(
+                    Orders.Order_ID,
+                    Orders.Date,
+                    Orders.Price,
+                    Orders.Status,
+                    Customer.Name.label("customer_name")
+                )
                 .join(Customer, Customer.Cust_ID == Orders.Cust_ID)
                 .filter(Orders.Date >= start_date, Orders.Date <= end_date)
                 .order_by(Orders.Date.desc())

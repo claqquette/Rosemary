@@ -474,15 +474,15 @@
             <table>
                 <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Price</th><th>Qty</th><th>Status</th></tr>
                 {% for o in orders_in_date_range %}
-                <tr>
-                    <td>{{ o.Order_ID }}</td>
-                    <td>{{ o.Date }}</td>
-                    <td>{{ o.customer.Name }}</td>
-                    <td>{{ "%.2f"|format(o.Price) }} ₪</td>
-                    <td>{{ o.total_quantity }}</td>
-                    <td>{{ o.Status }}</td>
-                </tr>
-                {% endfor %}
+<tr>
+  <td>{{ o.Order_ID }}</td>
+  <td>{{ o.Date }}</td>
+  <td>{{ o.customer_name }}</td>
+  <td>{{ "%.2f"|format(o.Price) }} ₪</td>
+  <td>{{ o.Status }}</td>
+</tr>
+{% endfor %}
+
             </table>
             {% else %}
             <p class="no-data">Select a start/end date to show orders.</p>
