@@ -1,6 +1,6 @@
 from . import db
 from .models import Product, WarehouseItem
-
+#this seed is to make it easier instead of inserting products and manifacturers each time we reset database
 def seed_products():
 
     # clear tables

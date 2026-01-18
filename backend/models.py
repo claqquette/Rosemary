@@ -12,7 +12,7 @@ class Manufacturer(db.Model):
     Address = db.Column(db.String(200))
     Email = db.Column(db.String(120))
 
-    # One manufacturer → many products
+    # One manufacturer to many products
     products = db.relationship(
         'Product',
         backref=db.backref('manufacturer'),

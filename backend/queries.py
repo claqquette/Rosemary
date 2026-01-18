@@ -89,7 +89,7 @@ def analytics():
         print(f"Error in query 4: {e}")
         customer_orders = []
 
-    # 5) Orders by employee (dynamic, optional)
+    # 5) Orders by employee (dynamic)
     try:
         if employee_id:
             employee_orders = (
@@ -164,7 +164,7 @@ def analytics():
         average_price = 0
 
 
-    # 10) Customers who ONLY buy discounted orders, they have no order with net discount=0
+    # 10) Customers who ONLY buy discounted orders, (they have no order with net discount=0)
     try:
         discount_only_customers = (
             db.session.query(
@@ -395,8 +395,7 @@ def analytics():
         top_selling_employee=top_selling_employee,
         products_with_manufacturers=products_with_manufacturers,
         customers_above_avg=customers_above_avg,
-
-        # keep input values so the form stays filled after submit
+        # keep input values
         customer_id=customer_id,
         employee_id=employee_id,
         manufacturer_id=manufacturer_id,

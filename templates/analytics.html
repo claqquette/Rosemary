@@ -20,6 +20,7 @@
             top: 0;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             padding: 30px 0;
+            z-index: 100;
         }
         .sidebar .logo {
             width: 120px;
@@ -74,6 +75,7 @@
             margin-bottom: 24px;
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            scroll-margin-top: 20px;
         }
         .section h2 {
             margin-top: 0;
@@ -170,7 +172,7 @@
         <h1>📊 Analytics Dashboard</h1>
 
         <!-- 1 -->
-        <div class="section">
+        <div class="section" id="section1">
             <h2>1. All Products</h2>
             {% if all_products %}
             <table>
@@ -191,7 +193,7 @@
         </div>
 
         <!-- 2 -->
-        <div class="section">
+        <div class="section" id="section2">
             <h2>2. All Customers</h2>
             {% if all_customers %}
             <table>
@@ -206,7 +208,7 @@
         </div>
 
         <!-- 3 -->
-        <div class="section">
+        <div class="section" id="section3">
             <h2>3. All Employees</h2>
             {% if all_employees %}
             <table>
@@ -221,64 +223,63 @@
         </div>
 
         <!-- 4 -->
-        <div class="section">
-    <h2>4. Orders by Customer</h2>
-    <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
-        <input type="number" name="customer_id" placeholder="Customer ID" value="{{ customer_id or '' }}">
-        <button type="submit">Search</button>
-        <span class="hint">Enter customer ID to show their orders</span>
-    </form>
+        <div class="section" id="section4">
+            <h2>4. Orders by Customer</h2>
+            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}#section4">
+                <input type="number" name="customer_id" placeholder="Customer ID" value="{{ customer_id or '' }}">
+                <button type="submit">Search</button>
+                <span class="hint">Enter customer ID to show their orders</span>
+            </form>
 
-    {% if customer_orders %}
-    <table>
-        <tr><th>Order ID</th><th>Date</th><th>Price</th><th>Qty</th><th>Discount</th><th>Status</th></tr>
-        {% for o in customer_orders %}
-        <tr>
-            <td>{{ o.Order_ID }}</td>
-            <td>{{ o.Date }}</td>
-            <td>{{ "%.2f"|format(o.Price) }} ₪</td>
-            <td>{{ o.total_quantity }}</td>
-            <td>{{ "%.2f"|format(o.Discount) }} ₪</td>
-            <td>{{ o.Status }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <p class="no-data">Enter a customer ID to view orders.</p>
-    {% endif %}
-</div>
+            {% if customer_orders %}
+            <table>
+                <tr><th>Order ID</th><th>Date</th><th>Price</th><th>Qty</th><th>Discount</th><th>Status</th></tr>
+                {% for o in customer_orders %}
+                <tr>
+                    <td>{{ o.Order_ID }}</td>
+                    <td>{{ o.Date }}</td>
+                    <td>{{ "%.2f"|format(o.Price) }} ₪</td>
+                    <td>{{ o.total_quantity }}</td>
+                    <td>{{ "%.2f"|format(o.Discount) }} ₪</td>
+                    <td>{{ o.Status }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">Enter a customer ID to view orders.</p>
+            {% endif %}
+        </div>
 
-<!-- Update section 5 in analytics.html -->
-<div class="section">
-    <h2>5. Orders Handled by Employee</h2>
-    <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
-        <input type="number" name="employee_id" placeholder="Employee ID" value="{{ employee_id or '' }}">
-        <button type="submit">Search</button>
-        <span class="hint">Enter employee ID to show orders they handled</span>
-    </form>
+        <!-- 5 -->
+        <div class="section" id="section5">
+            <h2>5. Orders Handled by Employee</h2>
+            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}#section5">
+                <input type="number" name="employee_id" placeholder="Employee ID" value="{{ employee_id or '' }}">
+                <button type="submit">Search</button>
+                <span class="hint">Enter employee ID to show orders they handled</span>
+            </form>
 
-    {% if employee_orders %}
-    <table>
-        <tr><th>Order ID</th><th>Date</th><th>Price</th><th>Qty</th><th>Discount</th><th>Status</th></tr>
-        {% for o in employee_orders %}
-        <tr>
-            <td>{{ o.Order_ID }}</td>
-            <td>{{ o.Date }}</td>
-            <td>{{ "%.2f"|format(o.Price) }} ₪</td>
-            <td>{{ o.total_quantity }}</td>
-            <td>{{ "%.2f"|format(o.Discount) }} ₪</td>
-            <td>{{ o.Status }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <p class="no-data">Enter an employee ID to view handled orders.</p>
-    {% endif %}
-</div>
-
+            {% if employee_orders %}
+            <table>
+                <tr><th>Order ID</th><th>Date</th><th>Price</th><th>Qty</th><th>Discount</th><th>Status</th></tr>
+                {% for o in employee_orders %}
+                <tr>
+                    <td>{{ o.Order_ID }}</td>
+                    <td>{{ o.Date }}</td>
+                    <td>{{ "%.2f"|format(o.Price) }} ₪</td>
+                    <td>{{ o.total_quantity }}</td>
+                    <td>{{ "%.2f"|format(o.Discount) }} ₪</td>
+                    <td>{{ o.Status }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">Enter an employee ID to view handled orders.</p>
+            {% endif %}
+        </div>
 
         <!-- 6 -->
-        <div class="section">
+        <div class="section" id="section6">
             <h2>6. Total Orders Per Customer</h2>
             {% if orders_per_customer %}
             <table>
@@ -293,7 +294,7 @@
         </div>
 
         <!-- 7 -->
-        <div class="section">
+        <div class="section" id="section7">
             <h2>7. Total Warehouse Value</h2>
             <div class="stat-box">
                 <strong>{{ "%.2f"|format(total_warehouse_value or 0) }} ₪</strong>
@@ -301,9 +302,9 @@
         </div>
 
         <!-- 8 -->
-        <div class="section">
+        <div class="section" id="section8">
             <h2>8. Products by Manufacturer</h2>
-            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
+            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}#section8">
                 <input type="number" name="manufacturer_id" placeholder="Manufacturer ID" value="{{ manufacturer_id or '' }}">
                 <button type="submit">Search</button>
                 <span class="hint">Enter manufacturer ID to show their products</span>
@@ -322,42 +323,39 @@
         </div>
 
         <!-- 9 -->
-        <div class="section">
+        <div class="section" id="section9">
             <h2>9. Average Product Price</h2>
             <div class="stat-box">
                 <strong>{{ "%.2f"|format(average_price or 0) }} ₪</strong>
             </div>
         </div>
 
-       <!-- 10 -->
-<div class="section">
-  <h2>10. Customers Who Only Buy Discounted Orders</h2>
-
-  {% if discount_only_customers %}
-  <table>
-    <tr>
-      <th>Customer ID</th><th>Name</th><th>Email</th>
-      <th>Total Orders</th><th>Min Discount</th>
-    </tr>
-    {% for c in discount_only_customers %}
-    <tr>
-      <td>{{ c.Cust_ID }}</td>
-      <td>{{ c.Name }}</td>
-      <td>{{ c.Email }}</td>
-      <td>{{ c.total_orders }}</td>
-      <td>{{ "%.2f"|format(c.min_discount) }}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% else %}
-    <p class="no-data">No customers found where ALL orders have a discount.</p>
-  {% endif %}
-</div>
-
-
+        <!-- 10 -->
+        <div class="section" id="section10">
+            <h2>10. Customers Who Only Buy Discounted Orders</h2>
+            {% if discount_only_customers %}
+            <table>
+                <tr>
+                    <th>Customer ID</th><th>Name</th><th>Email</th>
+                    <th>Total Orders</th><th>Min Discount</th>
+                </tr>
+                {% for c in discount_only_customers %}
+                <tr>
+                    <td>{{ c.Cust_ID }}</td>
+                    <td>{{ c.Name }}</td>
+                    <td>{{ c.Email }}</td>
+                    <td>{{ c.total_orders }}</td>
+                    <td>{{ "%.2f"|format(c.min_discount) }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+                <p class="no-data">No customers found where ALL orders have a discount.</p>
+            {% endif %}
+        </div>
 
         <!-- 11 -->
-        <div class="section">
+        <div class="section" id="section11">
             <h2>11. Available Products in Warehouse</h2>
             {% if available_products %}
             <table>
@@ -372,9 +370,9 @@
         </div>
 
         <!-- 12 -->
-        <div class="section">
+        <div class="section" id="section12">
             <h2>12. Low Stock Products</h2>
-            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
+            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}#section12">
                 <input type="number" name="low_stock" placeholder="Threshold" value="{{ low_stock_threshold or 10 }}">
                 <button type="submit">Apply</button>
                 <span class="hint">Shows products below this warehouse quantity</span>
@@ -398,9 +396,9 @@
         </div>
 
         <!-- 13 -->
-        <div class="section">
+        <div class="section" id="section13">
             <h2>13. Manufacturer of a Product</h2>
-            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
+            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}#section13">
                 <input type="number" name="product_id" placeholder="Product ID" value="{{ product_id or '' }}">
                 <button type="submit">Search</button>
                 <span class="hint">Enter product ID to show its manufacturer</span>
@@ -419,7 +417,7 @@
         </div>
 
         <!-- 14 -->
-        <div class="section">
+        <div class="section" id="section14">
             <h2>14. Top Spending Customer</h2>
             {% if top_spending_customer %}
             <div class="stat-box">
@@ -433,7 +431,7 @@
         </div>
 
         <!-- 15 -->
-        <div class="section">
+        <div class="section" id="section15">
             <h2>15. Customer with Most Orders</h2>
             {% if most_orders_customer %}
             <div class="stat-box">
@@ -447,7 +445,7 @@
         </div>
 
         <!-- 16 -->
-        <div class="section">
+        <div class="section" id="section16">
             <h2>16. Most Recent Order</h2>
             {% if most_recent_order %}
             <div class="stat-box">
@@ -462,36 +460,37 @@
         </div>
 
         <!-- 17 -->
-      <div class="section">
-    <h2>17. Orders in Date Range</h2>
-    <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}">
-        <span class="hint">From</span>
-        <input type="date" name="start_date" value="{{ start_date or '' }}">
-        <span class="hint">To</span>
-        <input type="date" name="end_date" value="{{ end_date or '' }}">
-        <button type="submit">Filter</button>
-    </form>
+        <div class="section" id="section17">
+            <h2>17. Orders in Date Range</h2>
+            <form class="mini-form" method="get" action="{{ url_for('queries.analytics') }}#section17">
+                <span class="hint">From</span>
+                <input type="date" name="start_date" value="{{ start_date or '' }}">
+                <span class="hint">To</span>
+                <input type="date" name="end_date" value="{{ end_date or '' }}">
+                <button type="submit">Filter</button>
+            </form>
 
-    {% if orders_in_date_range %}
-    <table>
-        <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Price</th><th>Qty</th><th>Status</th></tr>
-        {% for o in orders_in_date_range %}
-        <tr>
-            <td>{{ o.Order_ID }}</td>
-            <td>{{ o.Date }}</td>
-            <td>{{ o.customer.Name }}</td>
-            <td>{{ "%.2f"|format(o.Price) }} ₪</td>
-            <td>{{ o.total_quantity }}</td>
-            <td>{{ o.Status }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <p class="no-data">Select a start/end date to show orders.</p>
-    {% endif %}
-</div>
+            {% if orders_in_date_range %}
+            <table>
+                <tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Price</th><th>Qty</th><th>Status</th></tr>
+                {% for o in orders_in_date_range %}
+                <tr>
+                    <td>{{ o.Order_ID }}</td>
+                    <td>{{ o.Date }}</td>
+                    <td>{{ o.customer.Name }}</td>
+                    <td>{{ "%.2f"|format(o.Price) }} ₪</td>
+                    <td>{{ o.total_quantity }}</td>
+                    <td>{{ o.Status }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">Select a start/end date to show orders.</p>
+            {% endif %}
+        </div>
+
         <!-- 18 -->
-        <div class="section">
+        <div class="section" id="section18">
             <h2>18. Top Selling Employee</h2>
             {% if top_selling_employee %}
             <div class="stat-box">
@@ -505,7 +504,7 @@
         </div>
 
         <!-- 19 -->
-        <div class="section">
+        <div class="section" id="section19">
             <h2>19. Products with Manufacturers</h2>
             {% if products_with_manufacturers %}
             <table>
@@ -524,32 +523,30 @@
             {% endif %}
         </div>
 
-       <!-- 20 -->
-<div class="section">
-    <h2>20. Customers Who Spent More Than Average</h2>
-
-    {% if customers_above_avg %}
-    <table>
-        <tr>
-            <th>Customer ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Total Spent</th>
-        </tr>
-        {% for c, total in customers_above_avg %}
-        <tr>
-            <td>{{ c.Cust_ID }}</td>
-            <td>{{ c.Name }}</td>
-            <td>{{ c.Email }}</td>
-            <td>{{ "%.2f"|format(total) }} ₪</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <p class="no-data">No customers found above average spending.</p>
-    {% endif %}
-</div>
-
+        <!-- 20 -->
+        <div class="section" id="section20">
+            <h2>20. Customers Who Spent More Than Average</h2>
+            {% if customers_above_avg %}
+            <table>
+                <tr>
+                    <th>Customer ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Total Spent</th>
+                </tr>
+                {% for c, total in customers_above_avg %}
+                <tr>
+                    <td>{{ c.Cust_ID }}</td>
+                    <td>{{ c.Name }}</td>
+                    <td>{{ c.Email }}</td>
+                    <td>{{ "%.2f"|format(total) }} ₪</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="no-data">No customers found above average spending.</p>
+            {% endif %}
+        </div>
     </div>
 </body>
 </html>

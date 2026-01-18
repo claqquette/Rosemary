@@ -113,7 +113,7 @@ def remove_from_cart(product_id):
 
 
 
-# (customer presses checkout button in cart)
+# customer presses checkout button in cart
 
 @cart_bp.route('/checkout', methods=['POST'])
 @login_required
@@ -121,7 +121,6 @@ def checkout():
     if session.get("user_type") != "customer":
         return redirect(url_for('auth.login'))
 
-    # Must be a customer object
     if not hasattr(current_user, 'Cust_ID'):
         logout_user()
         session.clear()
@@ -164,10 +163,7 @@ def checkout():
     discount_total = round(discount_total, 2)
     final_price = round(total_before_discount - discount_total, 2)
 
-    # Assign default employee for online orders
-   # default_emp_id = get_default_employee()
-
-    #  Quantity field (it will be calculated from OrderItem)
+    #  Quantity field will be calculated from OrderItemm
     new_order = Orders(
         Cust_ID=current_user.Cust_ID,
         #Emp_ID=default_emp_id,
@@ -200,7 +196,7 @@ def checkout():
     return redirect(url_for('shop'))
 
 
-# if someone visits /checkout in browser (GET), redirect to cart
+# if someone visits /checkout in browser redirect to cart
 @cart_bp.route('/checkout', methods=['GET'])
 @login_required
 def checkout_get():
