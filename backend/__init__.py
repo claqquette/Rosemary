@@ -89,11 +89,11 @@ def create_app():
     from .employee_orders import employee_orders_bp
     app.register_blueprint(employee_orders_bp)
 
-
     with app.app_context():
         db.create_all()
 
-        from .seed import seed_products#SEED TO MAKE IT EASIER
-        seed_products()
+    #
+    #     from .seed import seed_products#SEED TO MAKE IT EASIER
+    #     seed_products()
 
     return app

@@ -52,7 +52,7 @@ def accept_order(order_id):
         return redirect(url_for("employee_orders.employee_orders"))
 
     order.Status = "accepted"
-    order.Emp_ID = current_user.Emp_ID  # employee gets credit for sales
+    order.Emp_ID = current_user.Emp_ID
     db.session.commit()
 
     flash(f"Order {order.Order_ID} accepted.", "success")

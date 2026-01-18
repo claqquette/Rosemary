@@ -321,16 +321,16 @@ def analytics():
     try:
         top_selling_employee = (
             db.session.query(
-                Employee.Emp_ID,
-                Employee.Name,
-                Employee.Email,
-                func.sum(OrderItem.Quantity).label('total_sold')
+                Employee.Name.label("Name"),
+                Employee.Email.label("Email"),
+                func.sum(OrderItem.Quantity).label("total_sold")
             )
             .join(Orders, Orders.Emp_ID == Employee.Emp_ID)
             .join(OrderItem, OrderItem.Order_ID == Orders.Order_ID)
-            .filter(Orders.Status == 'accepted')
+            .filter(func.lower(Orders.Status) == 'accepted')
+            .filter(Orders.Emp_ID.isnot(None))
             .group_by(Employee.Emp_ID, Employee.Name, Employee.Email)
-            .order_by(desc('total_sold'))
+            .order_by(desc("total_sold"))
             .first()
         )
     except Exception as e:
@@ -368,7 +368,8 @@ def analytics():
 
     # Second: average of total spent
     avg_spent = db.session.query(func.avg(subquery.c.total_spent)).scalar()
-
+    if avg_spent is None:
+        customers_above_avg = []#so the site dont crash when theeres no orders
     # Final: customers above average
     customers_above_avg = (
         db.session.query(Customer, subquery.c.total_spent)

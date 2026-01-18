@@ -489,19 +489,20 @@
             {% endif %}
         </div>
 
-        <!-- 18 -->
-        <div class="section" id="section18">
-            <h2>18. Top Selling Employee</h2>
-            {% if top_selling_employee %}
-            <div class="stat-box">
-                <p><strong>Name:</strong> {{ top_selling_employee.Name }}</p>
-                <p><strong>Email:</strong> {{ top_selling_employee.Email }}</p>
-                <p><strong>Total Items Sold:</strong> {{ top_selling_employee.total_sold }}</p>
-            </div>
-            {% else %}
-            <p class="no-data">No data available</p>
-            {% endif %}
-        </div>
+       <!-- 18 -->
+<div class="section" id="section18">
+    <h2>18. Top Selling Employee</h2>
+    {% if top_selling_employee %}
+    <div class="stat-box">
+        <p><strong>Name:</strong> {{ top_selling_employee.Name }}</p>
+        <p><strong>Email:</strong> {{ top_selling_employee.Email }}</p>
+        <p><strong>Total Items Sold:</strong> {{ top_selling_employee.total_sold }}</p>
+    </div>
+    {% else %}
+    <p class="no-data">No data available</p>
+    {% endif %}
+</div>
+
 
         <!-- 19 -->
         <div class="section" id="section19">

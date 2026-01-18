@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flask_login import login_required
-from .models import Product, WarehouseItem
+from .models import Product, WarehouseItem, OrderItem
+from sqlalchemy.exc import IntegrityError
+
 from . import db
 
 product_bp = Blueprint('product', __name__)
@@ -96,19 +98,28 @@ def delete_product(product_id):
         flash('Access denied. Employees only.', 'error')
         return redirect(url_for('shop'))
 
-    product = Product.query.get_or_404(product_id)
-
     try:
-        # 1) delete warehouse row first (prevents Product_ID -> NULL problem)
-        wi = WarehouseItem.query.filter_by(Product_ID=product_id).first()
-        if wi:
-            db.session.delete(wi)
+        # from OrderItem
+        OrderItem.query.filter_by(Product_ID=product_id).delete(synchronize_session=False)
+
+        # deletee warehouse row
+        WarehouseItem.query.filter_by(Product_ID=product_id).delete(synchronize_session=False)
+
+        #  delete the product
+        product = Product.query.get_or_404(product_id)
         db.session.delete(product)
+
         db.session.commit()
-        flash('Product deleted successfully!', 'success')
+        flash("Product deleted successfully.", "success")
+
+    except IntegrityError as e:
+        db.session.rollback()
+        flash("Cannot delete: this product is linked to existing records (orders/warehouse).", "error")
+        print("Delete IntegrityError:", e)
 
     except Exception as e:
         db.session.rollback()
-        flash(f"Delete failed: {e}", "error")
+        flash("Delete failed. Check console for details.", "error")
+        print("Delete error:", e)
 
-    return redirect(url_for('products'))
+    return redirect(url_for("products"))
